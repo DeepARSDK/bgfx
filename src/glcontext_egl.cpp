@@ -113,12 +113,16 @@ EGL_IMPORT
 			m_context = eglCreateContext(m_display, _config, _context, s_contextAttrs);
 			BX_CHECK(NULL != m_context, "Create swap chain failed: %x", eglGetError() );
 
+/*
+	
+			// When doing a video recording on Android, this seems to add the first black frame in the recording, so I removed it.
 			makeCurrent();
 			GL_CHECK(glClearColor(0.0f, 0.0f, 0.0f, 0.0f) );
 			GL_CHECK(glClear(GL_COLOR_BUFFER_BIT) );
 			swapBuffers();
 			GL_CHECK(glClear(GL_COLOR_BUFFER_BIT) );
 			swapBuffers();
+*/
 		}
 
 		~SwapChainGL()
@@ -380,6 +384,7 @@ EGL_IMPORT
 		return BX_ENABLED(0
 						| BX_PLATFORM_LINUX
 						| BX_PLATFORM_WINDOWS
+						| BX_PLATFORM_ANDROID // On Android, swap chain can be used for video capture
 						)
 			? BGFX_CAPS_SWAP_CHAIN
 			: 0
@@ -388,12 +393,15 @@ EGL_IMPORT
 
 	SwapChainGL* GlContext::createSwapChain(void* _nwh)
 	{
-		return BX_NEW(g_allocator, SwapChainGL)(m_display, m_config, m_context, (EGLNativeWindowType)_nwh);
+		SwapChainGL* swapChainGL = BX_NEW(g_allocator, SwapChainGL)(m_display, m_config, m_context, (EGLNativeWindowType)_nwh);
+		eglMakeCurrent(m_display, m_surface, m_surface, m_context);
+		return swapChainGL;
 	}
 
 	void GlContext::destroySwapChain(SwapChainGL* _swapChain)
 	{
 		BX_DELETE(g_allocator, _swapChain);
+		eglMakeCurrent(m_display, m_surface, m_surface, m_context);
 	}
 
 	void GlContext::swap(SwapChainGL* _swapChain)
