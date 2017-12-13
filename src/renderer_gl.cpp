@@ -5270,6 +5270,7 @@ namespace bgfx { namespace gl
 			&& !s_textureFormat[m_requestedFormat].m_supported
 			&& !s_renderGL->m_textureSwizzleSupport
 			;
+		const bool unmatchedPitch = rectpitch != srcpitch;
 		const bool unpackRowLength = BX_IGNORE_C4127(!!BGFX_CONFIG_RENDERER_OPENGL || s_extension[Extension::EXT_unpack_subimage].m_supported);
 		const bool compressed      = bimg::isCompressed(bimg::TextureFormat::Enum(m_requestedFormat) );
 		const bool convert         = false
@@ -5282,11 +5283,11 @@ namespace bgfx { namespace gl
 
 		uint8_t* temp = NULL;
 		if (convert
-		||  !unpackRowLength)
+		|| (!unpackRowLength && unmatchedPitch))
 		{
 			temp = (uint8_t*)BX_ALLOC(g_allocator, rectpitch*height);
 		}
-		else if (unpackRowLength)
+		else if (unpackRowLength && unmatchedPitch)
 		{
 			GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, srcpitch*8/bpp) );
 		}
@@ -5295,7 +5296,7 @@ namespace bgfx { namespace gl
 		{
 			const uint8_t* data = _mem->data;
 
-			if (!unpackRowLength)
+			if (!unpackRowLength && unmatchedPitch)
 			{
 				bimg::imageCopy(temp, width, height, bpp, srcpitch, data);
 				data = temp;
@@ -5325,7 +5326,7 @@ namespace bgfx { namespace gl
 				srcpitch = rectpitch;
 			}
 
-			if (!unpackRowLength
+			if ((!unpackRowLength && unmatchedPitch)
 			&&  !convert)
 			{
 				bimg::imageCopy(temp, width, height, bpp, srcpitch, data);
@@ -5347,7 +5348,7 @@ namespace bgfx { namespace gl
 		}
 
 		if (!convert
-		&&  unpackRowLength)
+		&&  unpackRowLength && unmatchedPitch)
 		{
 			GL_CHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0) );
 		}
