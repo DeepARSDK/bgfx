@@ -202,6 +202,23 @@ EGL_IMPORT
 			// https://www.khronos.org/registry/EGL/extensions/ANDROID/EGL_ANDROID_recordable.txt
 			const bool hasEglAndroidRecordable = !!bx::findIdentifierMatch(extensions, "EGL_ANDROID_recordable");
 
+			bool msaaEnabled = false;
+			uint32_t msaaSamples = 0;
+
+			if (bgfxMsaaLevel == 2) {
+				msaaSamples = 2;
+			} else if (bgfxMsaaLevel == 4) {
+				msaaSamples = 4;
+			} else if (bgfxMsaaLevel == 8) {
+				msaaSamples = 8;
+			} else if (bgfxMsaaLevel == 16) {
+				msaaSamples = 16;
+			}
+			if (msaaSamples != 0) {
+				msaaEnabled = true;
+			}
+
+
 			EGLint attrs[] =
 			{
 				EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
@@ -216,6 +233,9 @@ EGL_IMPORT
 				// Android Recordable surface
 				hasEglAndroidRecordable ? 0x3142 : EGL_NONE,
 				hasEglAndroidRecordable ? 1      : EGL_NONE,
+
+				EGL_SAMPLE_BUFFERS, msaaEnabled ? 1 : 0,
+				EGL_SAMPLES, msaaSamples,
 
 				EGL_NONE
 			};

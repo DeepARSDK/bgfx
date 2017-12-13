@@ -24,6 +24,7 @@ namespace bx { struct AllocatorI; }
 /// BGFX
 namespace bgfx
 {
+    extern uint32_t bgfxMsaaLevel;
 	/// Fatal error enum.
 	///
 	/// @attention C99 equivalent is `bgfx_fatal_t`.
