@@ -569,6 +569,7 @@ typedef struct bgfx_callback_vtbl
     void (*capture_begin)(bgfx_callback_interface_t* _this, uint32_t _width, uint32_t _height, uint32_t _pitch, bgfx_texture_format_t _format, bool _yflip);
     void (*capture_end)(bgfx_callback_interface_t* _this);
     void (*capture_frame)(bgfx_callback_interface_t* _this, const void* _data, uint32_t _size);
+    void (*flip_end)(bgfx_callback_interface_t* _this);
 
 } bgfx_callback_vtbl_t;
 

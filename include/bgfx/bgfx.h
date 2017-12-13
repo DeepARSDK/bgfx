@@ -550,6 +550,8 @@ namespace bgfx
 		/// @attention C99 equivalent is `bgfx_callback_vtbl.capture_frame`.
 		///
 		virtual void captureFrame(const void* _data, uint32_t _size) = 0;
+
+		virtual void flipEnd() = 0;
 	};
 
 	inline CallbackI::~CallbackI()

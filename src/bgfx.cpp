@@ -142,6 +142,10 @@ namespace bgfx
 		virtual void captureFrame(const void* /*_data*/, uint32_t /*_size*/) override
 		{
 		}
+
+		virtual void flipEnd() override
+		{
+		}
 	};
 
 #ifndef BGFX_CONFIG_MEMORY_TRACKING
@@ -1813,6 +1817,7 @@ namespace bgfx
 		{
 			m_renderCtx->flip(m_render->m_hmd);
 			m_flipped = true;
+			g_callback->flipEnd();
 
 			if (m_renderCtx->isDeviceRemoved() )
 			{
@@ -4545,6 +4550,10 @@ namespace bgfx
 		virtual void captureFrame(const void* _data, uint32_t _size) override
 		{
 			m_interface->vtbl->capture_frame(m_interface, _data, _size);
+		}
+		virtual void flipEnd() override
+		{
+			m_interface->vtbl->flip_end(m_interface);
 		}
 
 		bgfx_callback_interface_t* m_interface;

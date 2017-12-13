@@ -223,6 +223,10 @@ struct BgfxCallback : public bgfx::CallbackI
 		}
 	}
 
+    virtual void flipEnd() override
+    {
+    }
+
 	AviWriter* m_writer;
 };
 
