@@ -4085,7 +4085,7 @@ data.NumQualityLevels = 0;
 			}
 		}
 
-		uint32_t shaderSize;
+		uint16_t shaderSize;
 		bx::read(&reader, shaderSize);
 
 		const void* code = reader.getDataPtr();

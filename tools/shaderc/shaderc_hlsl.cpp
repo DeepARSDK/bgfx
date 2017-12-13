@@ -545,11 +545,10 @@ namespace bgfx { namespace hlsl
 		return true;
 	}
 
-	static bool compile(const Options& _options, uint32_t _version, const std::string& _code, bx::WriterI* _writer, bool _firstPass)
+	static bool compile(bx::CommandLine& _cmdLine, uint32_t _version, const std::string& _code, bx::WriterI* _writer, bool _firstPass)
 	{
-		const char* profile = _options.profile.c_str();
-
-		if (profile[0] == '\0')
+		const char* profile = _cmdLine.findOption('p', "profile");
+		if (NULL == profile)
 		{
 			fprintf(stderr, "Error: Shader profile must be specified.\n");
 			return false;
@@ -558,26 +557,27 @@ namespace bgfx { namespace hlsl
 		s_compiler = load();
 
 		bool result = false;
-		bool debug = _options.debugInformation;
+		bool debug = _cmdLine.hasArg('\0', "debug");
 
 		uint32_t flags = D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY;
 		flags |= debug ? D3DCOMPILE_DEBUG : 0;
-		flags |= _options.avoidFlowControl ? D3DCOMPILE_AVOID_FLOW_CONTROL : 0;
-		flags |= _options.noPreshader ? D3DCOMPILE_NO_PRESHADER : 0;
-		flags |= _options.partialPrecision ? D3DCOMPILE_PARTIAL_PRECISION : 0;
-		flags |= _options.preferFlowControl ? D3DCOMPILE_PREFER_FLOW_CONTROL : 0;
-		flags |= _options.backwardsCompatibility ? D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY : 0;
+		flags |= _cmdLine.hasArg('\0', "avoid-flow-control") ? D3DCOMPILE_AVOID_FLOW_CONTROL : 0;
+		flags |= _cmdLine.hasArg('\0', "no-preshader") ? D3DCOMPILE_NO_PRESHADER : 0;
+		flags |= _cmdLine.hasArg('\0', "partial-precision") ? D3DCOMPILE_PARTIAL_PRECISION : 0;
+		flags |= _cmdLine.hasArg('\0', "prefer-flow-control") ? D3DCOMPILE_PREFER_FLOW_CONTROL : 0;
+		flags |= _cmdLine.hasArg('\0', "backwards-compatibility") ? D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY : 0;
 
-		bool werror = _options.warningsAreErrors;
+		bool werror = _cmdLine.hasArg('\0', "Werror");
 
 		if (werror)
 		{
 			flags |= D3DCOMPILE_WARNINGS_ARE_ERRORS;
 		}
 
-		if (_options.optimize )
+		uint32_t optimization = 3;
+		if (_cmdLine.hasArg(optimization, 'O') )
 		{
-			uint32_t optimization = bx::uint32_min(_options.optimizationLevel, BX_COUNTOF(s_optimizationLevelD3D11) - 1);
+			optimization = bx::uint32_min(optimization, BX_COUNTOF(s_optimizationLevelD3D11) - 1);
 			flags |= s_optimizationLevelD3D11[optimization];
 		}
 		else
@@ -598,7 +598,8 @@ namespace bgfx { namespace hlsl
 
 		if (debug)
 		{
-			hlslfp = _options.outputFilePath + ".hlsl";
+			hlslfp = _cmdLine.findOption('o');
+			hlslfp += ".hlsl";
 			writeFile(hlslfp.c_str(), _code.c_str(), (int32_t)_code.size() );
 		}
 
@@ -707,7 +708,7 @@ namespace bgfx { namespace hlsl
 				}
 
 				// recompile with the unused uniforms converted to statics
-				return compile(_options, _version, output.c_str(), _writer, false);
+				return compile(_cmdLine, _version, output.c_str(), _writer, false);
 			}
 		}
 
@@ -755,7 +756,7 @@ namespace bgfx { namespace hlsl
 		}
 
 		{
-			uint32_t shaderSize = uint32_t(code->GetBufferSize() );
+			uint16_t shaderSize = (uint16_t)code->GetBufferSize();
 			bx::write(_writer, shaderSize);
 			bx::write(_writer, code->GetBufferPointer(), shaderSize);
 			uint8_t nul = 0;
@@ -770,7 +771,7 @@ namespace bgfx { namespace hlsl
 			bx::write(_writer, size);
 		}
 
-		if (_options.disasm )
+		if (_cmdLine.hasArg('\0', "disasm") )
 		{
 			ID3DBlob* disasm;
 			D3DDisassemble(code->GetBufferPointer()
@@ -782,7 +783,8 @@ namespace bgfx { namespace hlsl
 
 			if (NULL != disasm)
 			{
-				std::string disasmfp = _options.outputFilePath + ".disasm";
+				std::string disasmfp = _cmdLine.findOption('o');
+				disasmfp += ".disasm";
 
 				writeFile(disasmfp.c_str(), disasm->GetBufferPointer(), (uint32_t)disasm->GetBufferSize() );
 				disasm->Release();
@@ -804,9 +806,9 @@ namespace bgfx { namespace hlsl
 
 } // namespace hlsl
 
-	bool compileHLSLShader(const Options& _options, uint32_t _version, const std::string& _code, bx::WriterI* _writer)
+	bool compileHLSLShader(bx::CommandLine& _cmdLine, uint32_t _version, const std::string& _code, bx::WriterI* _writer)
 	{
-		return hlsl::compile(_options, _version, _code, _writer, true);
+		return hlsl::compile(_cmdLine, _version, _code, _writer, true);
 	}
 
 } // namespace bgfx
@@ -815,9 +817,9 @@ namespace bgfx { namespace hlsl
 
 namespace bgfx
 {
-	bool compileHLSLShader(const Options& _options, uint32_t _version, const std::string& _code, bx::WriterI* _writer)
+	bool compileHLSLShader(bx::CommandLine& _cmdLine, uint32_t _version, const std::string& _code, bx::WriterI* _writer)
 	{
-		BX_UNUSED(_options, _version, _code, _writer);
+		BX_UNUSED(_cmdLine, _version, _code, _writer);
 		fprintf(stderr, "HLSL compiler is not supported on this platform.\n");
 		return false;
 	}

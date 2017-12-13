@@ -4598,7 +4598,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 			}
 		}
 
-		uint32_t shaderSize;
+		uint16_t shaderSize;
 		bx::read(&reader, shaderSize);
 
 		const void* code = reader.getDataPtr();
