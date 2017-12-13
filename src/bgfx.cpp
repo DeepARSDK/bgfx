@@ -382,6 +382,12 @@ namespace bgfx
 		return rci->getInternal(_handle);
 	}
 
+	uintptr_t getInternalHandle(TextureHandle _handle) {
+		BGFX_CHECK_RENDER_THREAD();
+		RendererContextI* rci = s_ctx->m_renderCtx
+		return rci->getInternal(_handle);
+	}
+
 	void setGraphicsDebuggerPresent(bool _present)
 	{
 		BX_TRACE("Graphics debugger is %spresent.", _present ? "" : "not ");
