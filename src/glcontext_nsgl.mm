@@ -84,6 +84,9 @@ namespace bgfx { namespace gl
 #if defined(MAC_OS_X_VERSION_MAX_ALLOWED) && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1070)
 				NSOpenGLPFAOpenGLProfile, profile,
 #endif // defined(MAC_OS_X_VERSION_MAX_ALLOWED) && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1070)
+				NSOpenGLPFAMultisample,
+				NSOpenGLPFASampleBuffers, 1,
+				NSOpenGLPFASamples,       4,
 				NSOpenGLPFAColorSize,     24,
 				NSOpenGLPFAAlphaSize,     8,
 				NSOpenGLPFADepthSize,     24,
