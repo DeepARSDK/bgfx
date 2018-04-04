@@ -16,6 +16,8 @@ BX_ERROR_RESULT(BGFX_ERROR_TEXTURE_VALIDATION,  BX_MAKEFOURCC('b', 'g', 0, 1) );
 
 namespace bgfx
 {
+
+    bx::SpScUnboundedQueue* framePresentationTimes = NULL;
     // msaa android hack
     uint32_t bgfxMsaaLevel = 0;
 #define BGFX_API_THREAD_MAGIC UINT32_C(0x78666762)

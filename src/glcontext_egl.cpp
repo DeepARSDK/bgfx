@@ -101,6 +101,11 @@ EGL_IMPORT
 
 	static EGLint s_contextAttrs[16];
 
+
+	bool (*eglPresentationTimeANDROID_)(EGLDisplay dpy, EGLSurface sur,
+										khronos_stime_nanoseconds_t time);
+
+
 	struct SwapChainGL
 	{
 		SwapChainGL(EGLDisplay _display, EGLConfig _config, EGLContext _context, EGLNativeWindowType _nwh)
@@ -114,7 +119,7 @@ EGL_IMPORT
 			BX_CHECK(NULL != m_context, "Create swap chain failed: %x", eglGetError() );
 
 /*
-	
+
 			// When doing a video recording on Android, this seems to add the first black frame in the recording, so I removed it.
 			makeCurrent();
 			GL_CHECK(glClearColor(0.0f, 0.0f, 0.0f, 0.0f) );
@@ -203,7 +208,7 @@ EGL_IMPORT
 			const bool hasEglAndroidRecordable = !!bx::findIdentifierMatch(extensions, "EGL_ANDROID_recordable");
 
 			bool msaaEnabled = false;
-			uint32_t msaaSamples = 0;
+			int32_t msaaSamples = 0;
 
 			if (bgfxMsaaLevel == 2) {
 				msaaSamples = 2;
@@ -218,6 +223,9 @@ EGL_IMPORT
 				msaaEnabled = true;
 			}
 
+            eglPresentationTimeANDROID_ = reinterpret_cast<
+                    bool (*)(EGLDisplay, EGLSurface, khronos_stime_nanoseconds_t)>(
+                    eglGetProcAddress("eglPresentationTimeANDROID"));
 
 			EGLint attrs[] =
 			{
@@ -225,6 +233,8 @@ EGL_IMPORT
 
 #	if BX_PLATFORM_ANDROID
 				EGL_DEPTH_SIZE, 16,
+				EGL_SAMPLE_BUFFERS, msaaEnabled ? 1 : 0,
+				EGL_SAMPLES, msaaSamples,
 #	else
 				EGL_DEPTH_SIZE, 24,
 #	endif // BX_PLATFORM_
@@ -233,9 +243,6 @@ EGL_IMPORT
 				// Android Recordable surface
 				hasEglAndroidRecordable ? 0x3142 : EGL_NONE,
 				hasEglAndroidRecordable ? 1      : EGL_NONE,
-
-				EGL_SAMPLE_BUFFERS, msaaEnabled ? 1 : 0,
-				EGL_SAMPLES, msaaSamples,
 
 				EGL_NONE
 			};
@@ -432,7 +439,16 @@ EGL_IMPORT
 		{
 			if (NULL != m_display)
 			{
-				eglSwapBuffers(m_display, m_surface);
+				 // this for video processing
+                /*
+				int64_t* pTime = (int64_t*)bgfx::framePresentationTimes->pop();
+				if (pTime) {
+					eglPresentationTimeANDROID_(m_display, m_surface, (*pTime)*1000);
+					eglSwapBuffers(m_display, m_surface);
+					delete pTime;
+				}
+				*/
+                eglSwapBuffers(m_display, m_surface);
 			}
 		}
 		else

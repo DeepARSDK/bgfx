@@ -9,6 +9,7 @@
 #include <stdarg.h> // va_list
 #include <stdint.h> // uint32_t
 #include <stdlib.h> // NULL
+#include <bx/spscqueue.h>
 
 #include "defines.h"
 
@@ -24,7 +25,11 @@ namespace bx { struct AllocatorI; }
 /// BGFX
 namespace bgfx
 {
-    extern uint32_t bgfxMsaaLevel;
+    // Queue for the frame presentation time. This will be read from src/glcontext_egl.cpp (android only for now).
+	extern bx::SpScUnboundedQueue* framePresentationTimes;
+
+    // Set msaa level. This will be read from src/glcontext_egl.cpp (android only for now).
+	extern uint32_t bgfxMsaaLevel;
 	/// Fatal error enum.
 	///
 	/// @attention C99 equivalent is `bgfx_fatal_t`.
