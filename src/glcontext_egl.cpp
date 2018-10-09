@@ -222,13 +222,17 @@ EGL_IMPORT
 			if (msaaSamples != 0) {
 				msaaEnabled = true;
 			}
-
+#if !(BX_PLATFORM_EMSCRIPTEN)
             eglPresentationTimeANDROID_ = reinterpret_cast<
                     bool (*)(EGLDisplay, EGLSurface, khronos_stime_nanoseconds_t)>(
                     eglGetProcAddress("eglPresentationTimeANDROID"));
-
+#endif
 			EGLint attrs[] =
 			{
+				EGL_RED_SIZE, 8,
+				EGL_GREEN_SIZE, 8,
+				EGL_BLUE_SIZE, 8,
+				EGL_ALPHA_SIZE, 8,
 				EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
 
 #	if BX_PLATFORM_ANDROID
@@ -440,15 +444,16 @@ EGL_IMPORT
 			if (NULL != m_display)
 			{
 				 // this for video processing
-                /*
+#if VIDEO_PROCESSING_ENABLED
 				int64_t* pTime = (int64_t*)bgfx::framePresentationTimes->pop();
-				if (pTime) {
+				if (pTime && *pTime >= 0) {
 					eglPresentationTimeANDROID_(m_display, m_surface, (*pTime)*1000);
 					eglSwapBuffers(m_display, m_surface);
 					delete pTime;
 				}
-				*/
-                eglSwapBuffers(m_display, m_surface);
+#else
+				eglSwapBuffers(m_display, m_surface);
+#endif
 			}
 		}
 		else
