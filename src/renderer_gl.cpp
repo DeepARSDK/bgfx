@@ -4,6 +4,7 @@
  */
 
 #include "bgfx_p.h"
+//#include <emscripten.h>
 
 #if (BGFX_CONFIG_RENDERER_OPENGLES || BGFX_CONFIG_RENDERER_OPENGL)
 #	include "renderer_gl.h"
@@ -187,6 +188,92 @@ namespace bgfx { namespace gl
 		GLenum m_fmt;
 		GLenum m_type;
 		bool m_supported;
+	};
+
+	#define SKIP_NONE 0x00
+	#define SKIP_ALL 0x01
+	#define SKIP_FRAMEBUFFER_WRITE 0x02
+	#define SKIP_SRGB 0x04
+	#define SKIP_MIP_AUTOGEN 0x08
+
+	static uint8_t skipTextureFormatCheck[] = {
+			SKIP_ALL,//BC1,          //!< DXT1
+			SKIP_ALL,//BC2,          //!< DXT3
+			SKIP_ALL,//BC3,          //!< DXT5
+			SKIP_ALL,//BC4,          //!< LATC1/ATI1
+			SKIP_ALL,//BC5,          //!< LATC2/ATI2
+			SKIP_ALL,//BC6H,         //!< BC6H
+			SKIP_ALL,//BC7,          //!< BC7
+			SKIP_ALL,//ETC1,         //!< ETC1 RGB8
+			SKIP_ALL,//ETC2,         //!< ETC2 RGB8
+			SKIP_ALL,//ETC2A,        //!< ETC2 RGBA8
+			SKIP_ALL,//ETC2A1,       //!< ETC2 RGB8A1
+			SKIP_ALL,//PTC12,        //!< PVRTC1 RGB 2BPP
+			SKIP_ALL,//PTC14,        //!< PVRTC1 RGB 4BPP
+			SKIP_ALL,//PTC12A,       //!< PVRTC1 RGBA 2BPP
+			SKIP_ALL,//PTC14A,       //!< PVRTC1 RGBA 4BPP
+			SKIP_ALL,//PTC22,        //!< PVRTC2 RGBA 2BPP
+			SKIP_ALL,//PTC24,        //!< PVRTC2 RGBA 4BPP
+			SKIP_ALL,//Unknown,      // Compressed formats above.
+			SKIP_ALL,//R1,
+			SKIP_FRAMEBUFFER_WRITE,//A8,
+			SKIP_FRAMEBUFFER_WRITE,//R8, 20
+			SKIP_ALL,//R8I,
+			SKIP_ALL,//R8U,
+			SKIP_ALL,//R8S,
+			SKIP_ALL,//R16,
+			SKIP_ALL,//R16I,
+			SKIP_ALL,//R16U,
+			SKIP_ALL,//R16F,
+			SKIP_ALL,//R16S,
+			SKIP_ALL,//R32I,
+			SKIP_ALL,//R32U, 30
+			SKIP_ALL,//R32F,
+			SKIP_ALL,//RG8,
+			SKIP_ALL,//RG8I,
+			SKIP_ALL,//RG8U,
+			SKIP_ALL,//RG8S,
+			SKIP_ALL,//RG16,
+			SKIP_ALL,//RG16I,
+			SKIP_ALL,//RG16U,
+			SKIP_ALL,//RG16F,
+			SKIP_ALL,//RG16S, 40
+			SKIP_ALL,//RG32I,
+			SKIP_ALL,//RG32U,
+			SKIP_ALL,//RG32F,
+			SKIP_ALL,//RGB8,
+			SKIP_ALL,//RGB8I,
+			SKIP_ALL,//RGB8U,
+			SKIP_ALL,//RGB8S,
+			SKIP_ALL,//RGB9E5F,
+			SKIP_ALL,//BGRA8,
+			SKIP_FRAMEBUFFER_WRITE | SKIP_SRGB,//RGBA8, 50
+			SKIP_ALL,//RGBA8I,
+			SKIP_ALL,//RGBA8U,
+			SKIP_ALL,//RGBA8S,
+			SKIP_ALL,//RGBA16,
+			SKIP_ALL,//RGBA16I,
+			SKIP_ALL,//RGBA16U,
+			SKIP_ALL,//RGBA16F,
+			SKIP_ALL,//RGBA16S,
+			SKIP_ALL,//RGBA32I,
+			SKIP_ALL,//RGBA32U,
+			SKIP_ALL,//RGBA32F, 60
+			SKIP_ALL,//R5G6B5,
+			SKIP_ALL,//RGBA4,
+			SKIP_ALL,//RGB5A1,
+			SKIP_ALL,//RGB10A2,
+			SKIP_ALL,//RG11B10F,
+			SKIP_ALL,//UnknownDepth, // Depth formats below.
+			SKIP_MIP_AUTOGEN,//D16,
+			SKIP_ALL,//D24,
+			SKIP_ALL,//D24S8,
+			SKIP_ALL,//D32, 70
+			SKIP_ALL,//D16F,
+			SKIP_ALL,//D24F,
+			SKIP_ALL,//D32F,
+			SKIP_ALL,//D0S8,
+			SKIP_ALL//Count
 	};
 
 	static TextureFormatInfo s_textureFormat[] =
@@ -2129,7 +2216,11 @@ namespace bgfx { namespace gl
 					if (TextureFormat::Unknown != ii
 					&&  TextureFormat::UnknownDepth != ii)
 					{
+						if (BX_ENABLED(BX_PLATFORM_EMSCRIPTEN) && (SKIP_ALL & skipTextureFormatCheck[ii]) == SKIP_ALL) {
+							continue;
+						}
 						s_textureFormat[ii].m_supported = isTextureFormatValid(TextureFormat::Enum(ii) );
+
 					}
 				}
 
@@ -2149,6 +2240,11 @@ namespace bgfx { namespace gl
 
 				for (uint32_t ii = 0; ii < TextureFormat::Count; ++ii)
 				{
+
+					if (BX_ENABLED(BX_PLATFORM_EMSCRIPTEN) && (SKIP_ALL & skipTextureFormatCheck[ii]) == SKIP_ALL) {
+						continue;
+					}
+
 					uint16_t supported = BGFX_CAPS_FORMAT_TEXTURE_NONE;
 					supported |= s_textureFormat[ii].m_supported
 						? BGFX_CAPS_FORMAT_TEXTURE_2D
@@ -2157,17 +2253,21 @@ namespace bgfx { namespace gl
 						: BGFX_CAPS_FORMAT_TEXTURE_NONE
 						;
 
+					if (!BX_ENABLED(BX_PLATFORM_EMSCRIPTEN) || (SKIP_SRGB & skipTextureFormatCheck[ii]) != SKIP_SRGB) {
 					supported |= isTextureFormatValid(TextureFormat::Enum(ii), true)
 						? BGFX_CAPS_FORMAT_TEXTURE_2D_SRGB
 						| BGFX_CAPS_FORMAT_TEXTURE_3D_SRGB
 						| BGFX_CAPS_FORMAT_TEXTURE_CUBE_SRGB
 						: BGFX_CAPS_FORMAT_TEXTURE_NONE
 						;
+					}
 
+					if (!BX_ENABLED(BX_PLATFORM_EMSCRIPTEN) || (SKIP_MIP_AUTOGEN & skipTextureFormatCheck[ii]) != SKIP_MIP_AUTOGEN) {
 					supported |= isTextureFormatValid(TextureFormat::Enum(ii), false, true)
 						? BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN
 						: BGFX_CAPS_FORMAT_TEXTURE_NONE
 						;
+					}
 
 					supported |= computeSupport
 						&& isImageFormatValid(TextureFormat::Enum(ii) )
@@ -2180,10 +2280,14 @@ namespace bgfx { namespace gl
 						: BGFX_CAPS_FORMAT_TEXTURE_NONE
 						;
 
+
+					if (!BX_ENABLED(BX_PLATFORM_EMSCRIPTEN) || (SKIP_FRAMEBUFFER_WRITE & skipTextureFormatCheck[ii]) != SKIP_FRAMEBUFFER_WRITE) {
 					supported |= isFramebufferFormatValid(TextureFormat::Enum(ii), false, true)
 						? BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER
 						: BGFX_CAPS_FORMAT_TEXTURE_NONE
 						;
+
+					}
 
 					if (NULL != glGetInternalformativ)
 					{
@@ -2929,7 +3033,10 @@ namespace bgfx { namespace gl
 				swapChain = frameBuffer.m_swapChain;
 				width  = frameBuffer.m_width;
 				height = frameBuffer.m_height;
+			} else {
+				GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, m_backBufferFbo) );
 			}
+
 			m_glctx.makeCurrent(swapChain);
 
 			uint32_t length = width*height*4;
@@ -4776,6 +4883,8 @@ namespace bgfx { namespace gl
 
 	void ProgramGL::bindAttributes(const VertexDecl& _vertexDecl, uint32_t _baseVertex)
 	{
+		for (uint32_t iii = 0; iii < 10; iii++) { glDisableVertexAttribArray(iii); }
+
 		for (uint32_t ii = 0, iiEnd = m_usedCount; ii < iiEnd; ++ii)
 		{
 			Attrib::Enum attr = Attrib::Enum(m_used[ii]);
@@ -5629,6 +5738,14 @@ namespace bgfx { namespace gl
 					bool usesTextureLod = !!bx::findIdentifierMatch(code, s_EXT_shader_texture_lod);
 
 					bool usesFragmentOrdering = !!bx::findIdentifierMatch(code, "beginFragmentShaderOrdering");
+
+					bool OESimageExternal  = !!bx::findIdentifierMatch(code, "samplerExternalOES");
+
+					if (OESimageExternal)
+					{
+						writeString(&writer, "#extension GL_OES_EGL_image_external : require\n");
+						writeString(&writer, "#define textureExternal(_sampler, _coord) texture2D(_sampler, _coord)\n");
+					}
 
 					if (usesDerivatives)
 					{
