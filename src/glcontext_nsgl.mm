@@ -138,7 +138,11 @@ namespace bgfx { namespace gl
 
 			m_view    = glView;
 			m_context = glContext;
-		}
+        } else {
+            NSOpenGLContext* glContext = (NSOpenGLContext*)m_context;
+            [glContext makeCurrentContext];
+        }
+
 
 		import();
 

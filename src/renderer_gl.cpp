@@ -5,6 +5,7 @@
 
 #include "bgfx_p.h"
 //#include <emscripten.h>
+#include <string>
 
 #if (BGFX_CONFIG_RENDERER_OPENGLES || BGFX_CONFIG_RENDERER_OPENGL)
 #	include "renderer_gl.h"
@@ -2836,9 +2837,9 @@ namespace bgfx { namespace gl
 			m_program[_handle.idx].destroy();
 		}
 
-		void* createTexture(TextureHandle _handle, Memory* _mem, uint32_t _flags, uint8_t _skip) override
+		void* createTexture(TextureHandle _handle, Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle) override
 		{
-			m_textures[_handle.idx].create(_mem, _flags, _skip);
+			m_textures[_handle.idx].create(_mem, _flags, _skip, nativeHandle);
 			return NULL;
 		}
 
@@ -2953,7 +2954,7 @@ namespace bgfx { namespace gl
 			bx::write(&writer, tc);
 
 			texture.destroy();
-			texture.create(mem, texture.m_flags, 0);
+			texture.create(mem, texture.m_flags, 0, 0);
 
 			release(mem);
 		}
@@ -4967,6 +4968,11 @@ namespace bgfx { namespace gl
 		m_depth   = _depth;
 		m_currentSamplerHash = UINT32_MAX;
 
+		if (m_id) {
+			createFromNative(m_id, _flags);
+			return true;
+		}
+
 		const bool writeOnly    = 0 != (m_flags&BGFX_TEXTURE_RT_WRITE_ONLY);
 		const bool computeWrite = 0 != (m_flags&BGFX_TEXTURE_COMPUTE_WRITE );
 		const bool srgb         = 0 != (m_flags&BGFX_TEXTURE_SRGB);
@@ -5103,8 +5109,34 @@ namespace bgfx { namespace gl
 		return true;
 	}
 
-	void TextureGL::create(const Memory* _mem, uint32_t _flags, uint8_t _skip)
+	void TextureGL::createFromNative(uint32_t _nativeHandle, uint32_t _flags)
 	{
+
+		m_id = _nativeHandle;
+		m_flags = _flags;
+		m_flags |= BGFX_TEXTURE_INTERNAL_SHARED;
+		const GLenum s_targets[] = {
+			GL_TEXTURE_2D,
+			GL_TEXTURE_RECTANGLE
+		};
+
+		for (int i = 0; i < sizeof(s_targets); i++) {
+			GLenum target = s_targets[i];
+			glBindTexture(target, m_id);
+			if (glGetError() == 0) {
+				m_target = target;
+				break;
+			}
+		}
+		glBindTexture(m_target, 0);
+	}
+
+	void TextureGL::create(const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle)
+	{
+		if (nativeHandle) {
+			m_id = nativeHandle;
+		}
+
 		bimg::ImageContainer imageContainer;
 
 		if (bimg::imageParse(imageContainer, _mem->data, _mem->size) )
@@ -5358,6 +5390,21 @@ namespace bgfx { namespace gl
 		destroy();
 		m_flags |= BGFX_TEXTURE_INTERNAL_SHARED;
 		m_id = (GLuint)_ptr;
+
+        const GLenum s_targets[] = {
+            GL_TEXTURE_2D,
+            GL_TEXTURE_RECTANGLE
+        };
+
+        for (int i = 0; i < sizeof(s_targets); i++) {
+            GLenum target = s_targets[i];
+            glBindTexture(target, m_id);
+            if (glGetError() == 0) {
+                m_target = target;
+                break;
+            }
+        }
+        glBindTexture(m_target, 0);
 	}
 
 	void TextureGL::update(uint8_t _side, uint8_t _mip, const Rect& _rect, uint16_t _z, uint16_t _depth, uint16_t _pitch, const Memory* _mem)
@@ -5699,7 +5746,15 @@ namespace bgfx { namespace gl
 				, BGFX_CHUNK_MAGIC_FSH == magic ? "fragment" : BGFX_CHUNK_MAGIC_VSH == magic ? "vertex" : "compute"
 				);
 
-		const char* code = (const char*)reader.getDataPtr();
+		std::string codeStr = (const char*)reader.getDataPtr();
+		std::string toSearch = "textureRect";
+		std::string replaceStr = "texture2DRect";
+		size_t pos = codeStr.find(toSearch);
+		if (pos != std::string::npos) {
+		    codeStr.replace(pos, toSearch.size(), replaceStr);
+		}
+
+		const char* code = codeStr.c_str();// (const char*)reader.getDataPtr();
 
 		if (0 != m_id)
 		{

@@ -2527,7 +2527,9 @@ namespace bgfx
 		, uint16_t _numLayers
 		, TextureFormat::Enum _format
 		, uint32_t _flags = BGFX_TEXTURE_NONE
+		, uint32_t _nativeHandle = 0
 		);
+
 
 	/// Create 3D texture.
 	///

@@ -679,6 +679,10 @@ typedef uint64_t GLuint64;
 #	define GL_SAMPLER_2D_ARRAY_SHADOW 0x8DC4
 #endif // GL_SAMPLER_2D_ARRAY_SHADOW
 
+#ifndef GL_TEXTURE_RECTANGLE
+#    define GL_TEXTURE_RECTANGLE 0x84F5
+#endif // GL_TEXTURE_RECTANGLE
+
 #ifndef GL_TEXTURE_MAX_LEVEL
 #	define GL_TEXTURE_MAX_LEVEL 0x813D
 #endif // GL_TEXTURE_MAX_LEVEL
@@ -1178,7 +1182,8 @@ namespace bgfx { namespace gl
 		}
 
 		bool init(GLenum _target, uint32_t _width, uint32_t _height, uint32_t _depth, uint8_t _numMips, uint32_t _flags);
-		void create(const Memory* _mem, uint32_t _flags, uint8_t _skip);
+		void create(const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle);
+		void createFromNative(uint32_t _nativeHandle, uint32_t _flags);
 		void destroy();
 		void overrideInternal(uintptr_t _ptr);
 		void update(uint8_t _side, uint8_t _mip, const Rect& _rect, uint16_t _z, uint16_t _depth, uint16_t _pitch, const Memory* _mem);
