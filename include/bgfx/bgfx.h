@@ -2503,6 +2503,17 @@ namespace bgfx
 		, const Memory* _mem = NULL
 		);
 
+    TextureHandle createTexture2DN(
+          uint16_t _width
+        , uint16_t _height
+        , bool     _hasMips
+        , uint16_t _numLayers
+        , TextureFormat::Enum _format
+        , uint32_t _flags
+        , const Memory* _mem
+        , uint32_t _nativeHandle
+        );
+
 	/// Create frame buffer with size based on backbuffer ratio. Frame buffer will maintain ratio
 	/// if back buffer resolution changes.
 	///

@@ -4969,7 +4969,11 @@ namespace bgfx { namespace gl
 		m_currentSamplerHash = UINT32_MAX;
 
 		if (m_id) {
+			const TextureFormatInfo& tfi = s_textureFormat[m_textureFormat];
+			m_fmt  = tfi.m_fmt;
+			m_type = tfi.m_type;
 			createFromNative(m_id, _flags);
+			setSamplerState(_flags, NULL);
 			return true;
 		}
 
@@ -5135,6 +5139,8 @@ namespace bgfx { namespace gl
 	{
 		if (nativeHandle) {
 			m_id = nativeHandle;
+		} else {
+			m_id = 0;
 		}
 
 		bimg::ImageContainer imageContainer;
