@@ -5421,7 +5421,7 @@ static uint8_t skipTextureFormatCheck[] = {
 
 		m_id = _nativeHandle;
 		m_flags = _flags;
-		m_flags |= BGFX_TEXTURE_INTERNAL_SHARED;
+		m_flags |= BGFX_SAMPLER_INTERNAL_SHARED;
 		const GLenum s_targets[] = {
 			GL_TEXTURE_2D,
 			GL_TEXTURE_RECTANGLE

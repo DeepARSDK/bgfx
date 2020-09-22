@@ -1377,7 +1377,7 @@ namespace bgfx { namespace gl
 		{
 		}
 
-		bool init(GLenum _target, uint32_t _width, uint32_t _height, uint32_t _depth, uint8_t _numMips, uint32_t _flags);
+		bool init(GLenum _target, uint32_t _width, uint32_t _height, uint32_t _depth, uint8_t _numMips, uint64_t _flags);
 		void create(const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle);
 		void createFromNative(uint32_t _nativeHandle, uint32_t _flags);
 		void destroy();

@@ -4383,7 +4383,7 @@ namespace bgfx
 		_height = bx::max<uint16_t>(1, _height);
 	}
 
-	static TextureHandle createTexture2D(BackbufferRatio::Enum _ratio, uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint32_t _flags, const Memory* _mem, uint32_t _nativeHandle)
+	static TextureHandle createTexture2D(BackbufferRatio::Enum _ratio, uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint32_t _flags, const Memory* _mem, uint32_t _nativeHandle = 0)
 	{
 		bx::Error err;
 		isTextureValid(0, false, _numLayers, _format, _flags, &err);
@@ -4438,7 +4438,7 @@ namespace bgfx
 
     TextureHandle createTexture2DN(uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint32_t _flags, const Memory* _mem, uint32_t _nativeHandle)
     {
-        BX_CHECK(_width > 0 && _height > 0, "Invalid texture size (width %d, height %d).", _width, _height);
+        BX_ASSERT(_width > 0 && _height > 0, "Invalid texture size (width %d, height %d).", _width, _height);
         return createTexture2D(BackbufferRatio::Count, _width, _height, _hasMips, _numLayers, _format, _flags, _mem, _nativeHandle);
     }
 
