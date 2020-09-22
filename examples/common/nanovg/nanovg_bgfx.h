@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 Branimir Karadzic. All rights reserved.
+ * Copyright 2011-2020 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bgfx#license-bsd-2-clause
  */
 
@@ -27,10 +27,10 @@ NVGcontext* nvgCreate(int32_t _edgeaa, bgfx::ViewId _viewId, bx::AllocatorI* _al
 NVGcontext* nvgCreate(int32_t _edgeaa, bgfx::ViewId _viewId);
 
 ///
-void nvgDelete(struct NVGcontext* _ctx);
+void nvgDelete(NVGcontext* _ctx);
 
 ///
-void nvgSetViewId(struct NVGcontext* _ctx, bgfx::ViewId _viewId);
+void nvgSetViewId(NVGcontext* _ctx, bgfx::ViewId _viewId);
 
 ///
 uint16_t nvgGetViewId(struct NVGcontext* _ctx);
@@ -60,6 +60,12 @@ NVGLUframebuffer* nvgluCreateFramebuffer(NVGcontext* _ctx, int32_t _width, int32
 
 ///
 NVGLUframebuffer* nvgluCreateFramebuffer(NVGcontext* _ctx, int32_t _width, int32_t _height, int32_t _imageFlags);
+
+///
+NVGLUframebuffer* nvgluCreateFramebuffer(NVGcontext* _ctx, int32_t _imageFlags, bgfx::ViewId _viewId);
+
+///
+NVGLUframebuffer* nvgluCreateFramebuffer(NVGcontext* _ctx, int32_t _imageFlags);
 
 ///
 void nvgluBindFramebuffer(NVGLUframebuffer* _framebuffer);

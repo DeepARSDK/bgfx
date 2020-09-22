@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 Branimir Karadzic. All rights reserved.
+ * Copyright 2011-2020 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bgfx#license-bsd-2-clause
  */
 
@@ -208,7 +208,7 @@ namespace entry
 	static void initTranslateKey(uint16_t _xk, Key::Enum _key)
 	{
 		_xk += 256;
-		BX_CHECK(_xk < BX_COUNTOF(s_translateKey), "Out of bounds %d.", _xk);
+		BX_ASSERT(_xk < BX_COUNTOF(s_translateKey), "Out of bounds %d.", _xk);
 		s_translateKey[_xk&0x1ff] = (uint8_t)_key;
 	}
 
@@ -346,7 +346,7 @@ namespace entry
 		int32_t run(int _argc, const char* const* _argv)
 		{
 			XInitThreads();
-			m_display = XOpenDisplay(0);
+			m_display = XOpenDisplay(NULL);
 
 			int32_t screen = DefaultScreen(m_display);
 			m_depth  = DefaultDepth(m_display, screen);
@@ -354,8 +354,9 @@ namespace entry
 			m_root   = RootWindow(m_display, screen);
 
 			bx::memSet(&m_windowAttrs, 0, sizeof(m_windowAttrs) );
-			m_windowAttrs.background_pixmap = 0;
+			m_windowAttrs.background_pixel = 0;
 			m_windowAttrs.border_pixel = 0;
+			m_windowAttrs.bit_gravity = StaticGravity;
 			m_windowAttrs.event_mask = 0
 					| ButtonPressMask
 					| ButtonReleaseMask
@@ -374,14 +375,9 @@ namespace entry
 									, m_depth
 									, InputOutput
 									, m_visual
-									, CWBorderPixel|CWEventMask
+									, CWBorderPixel|CWEventMask|CWBackPixel|CWBitGravity
 									, &m_windowAttrs
 									);
-
-			// Clear window to black.
-			XSetWindowAttributes attr;
-			bx::memSet(&attr, 0, sizeof(attr) );
-			XChangeWindowAttributes(m_display, m_window[0], CWBackPixel, &attr);
 
 			const char* wmDeleteWindowName = "WM_DELETE_WINDOW";
 			Atom wmDeleteWindow;
@@ -599,15 +595,10 @@ namespace entry
 									, m_depth
 									, InputOutput
 									, m_visual
-									, CWBorderPixel|CWEventMask
+									, CWBorderPixel|CWEventMask|CWBackPixel|CWBitGravity
 									, &m_windowAttrs
 									);
 			m_window[_handle.idx] = window;
-
-			// Clear window to black.
-			XSetWindowAttributes attr;
-			bx::memSet(&attr, 0, sizeof(attr) );
-			XChangeWindowAttributes(m_display, window, CWBackPixel, &attr);
 
 			const char* wmDeleteWindowName = "WM_DELETE_WINDOW";
 			Atom wmDeleteWindow;
@@ -758,9 +749,9 @@ namespace entry
 		XStoreName(display, window, _title);
 	}
 
-	void toggleWindowFrame(WindowHandle _handle)
+	void setWindowFlags(WindowHandle _handle, uint32_t _flags, bool _enabled)
 	{
-		BX_UNUSED(_handle);
+		BX_UNUSED(_handle, _flags, _enabled);
 	}
 
 	void toggleFullscreen(WindowHandle _handle)

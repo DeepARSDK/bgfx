@@ -253,7 +253,7 @@ void TextBuffer::appendText(FontHandle _fontHandle, const char* _string, const c
 	{
 		_end = _string + bx::strLen(_string);
 	}
-	BX_CHECK(_end >= _string);
+	BX_ASSERT(_end >= _string);
 
 	for (; *_string && _string < _end ; ++_string)
 	{
@@ -263,7 +263,7 @@ void TextBuffer::appendText(FontHandle _fontHandle, const char* _string, const c
 		}
 	}
 
-	BX_CHECK(state == UTF8_ACCEPT, "The string is not well-formed");
+	BX_ASSERT(state == UTF8_ACCEPT, "The string is not well-formed");
 }
 
 void TextBuffer::appendText(FontHandle _fontHandle, const wchar_t* _string, const wchar_t* _end)
@@ -281,7 +281,7 @@ void TextBuffer::appendText(FontHandle _fontHandle, const wchar_t* _string, cons
 	{
 		_end = _string + wcslen(_string);
 	}
-	BX_CHECK(_end >= _string);
+	BX_ASSERT(_end >= _string);
 
 	for (const wchar_t* _current = _string; _current < _end; ++_current)
 	{
@@ -598,19 +598,19 @@ TextBufferManager::TextBufferManager(FontManager* _fontManager)
 		, true
 		);
 
-	m_vertexDecl
+	m_vertexLayout
 		.begin()
 		.add(bgfx::Attrib::Position,  2, bgfx::AttribType::Float)
 		.add(bgfx::Attrib::TexCoord0, 4, bgfx::AttribType::Int16, true)
 		.add(bgfx::Attrib::Color0,    4, bgfx::AttribType::Uint8, true)
 		.end();
 
-	s_texColor = bgfx::createUniform("s_texColor", bgfx::UniformType::Int1);
+	s_texColor = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
 }
 
 TextBufferManager::~TextBufferManager()
 {
-	BX_CHECK(m_textBufferHandles.getNumHandles() == 0, "All the text buffers must be destroyed before destroying the manager");
+	BX_ASSERT(m_textBufferHandles.getNumHandles() == 0, "All the text buffers must be destroyed before destroying the manager");
 	delete [] m_textBuffers;
 
 	bgfx::destroy(s_texColor);
@@ -637,7 +637,7 @@ TextBufferHandle TextBufferManager::createTextBuffer(uint32_t _type, BufferType:
 
 void TextBufferManager::destroyTextBuffer(TextBufferHandle _handle)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	m_textBufferHandles.free(_handle.idx);
@@ -680,7 +680,7 @@ void TextBufferManager::destroyTextBuffer(TextBufferHandle _handle)
 
 void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId _id, int32_t _depth)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 
 	BufferCache& bc = m_textBuffers[_handle.idx];
 
@@ -700,7 +700,7 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 	case FONT_TYPE_ALPHA:
 		program = m_basicProgram;
 		bgfx::setState(0
-			| BGFX_STATE_RGB_WRITE
+			| BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
 			);
 		break;
@@ -708,7 +708,7 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 	case FONT_TYPE_DISTANCE:
 		program = m_distanceProgram;
 		bgfx::setState(0
-			| BGFX_STATE_RGB_WRITE
+			| BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
 			);
 		break;
@@ -716,7 +716,7 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 	case FONT_TYPE_DISTANCE_SUBPIXEL:
 		program = m_distanceSubpixelProgram;
 		bgfx::setState(0
-			| BGFX_STATE_RGB_WRITE
+			| BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_FACTOR, BGFX_STATE_BLEND_INV_SRC_COLOR)
 			, bc.textBuffer->getTextColor()
 			);
@@ -738,7 +738,7 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 
 				vbh = bgfx::createVertexBuffer(
 								  bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize)
-								, m_vertexDecl
+								, m_vertexLayout
 								);
 
 				bc.vertexBufferHandleIdx = vbh.idx;
@@ -768,7 +768,7 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 
 				vbh = bgfx::createDynamicVertexBuffer(
 								  bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize)
-								, m_vertexDecl
+								, m_vertexLayout
 								);
 
 				bc.indexBufferHandleIdx = ibh.idx;
@@ -779,15 +779,17 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 				ibh.idx = bc.indexBufferHandleIdx;
 				vbh.idx = bc.vertexBufferHandleIdx;
 
-				bgfx::updateDynamicIndexBuffer(ibh
-						, 0
-						, bgfx::copy(bc.textBuffer->getIndexBuffer(), indexSize)
-						);
+				bgfx::update(
+					  ibh
+					, 0
+					, bgfx::copy(bc.textBuffer->getIndexBuffer(), indexSize)
+					);
 
-				bgfx::updateDynamicVertexBuffer(vbh
-						, 0
-						, bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize)
-						);
+				bgfx::update(
+					  vbh
+					, 0
+					, bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize)
+					);
 			}
 
 			bgfx::setVertexBuffer(0, vbh, 0, bc.textBuffer->getVertexCount() );
@@ -800,7 +802,7 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 			bgfx::TransientIndexBuffer tib;
 			bgfx::TransientVertexBuffer tvb;
 			bgfx::allocTransientIndexBuffer(&tib, bc.textBuffer->getIndexCount() );
-			bgfx::allocTransientVertexBuffer(&tvb, bc.textBuffer->getVertexCount(), m_vertexDecl);
+			bgfx::allocTransientVertexBuffer(&tvb, bc.textBuffer->getVertexCount(), m_vertexLayout);
 			bx::memCopy(tib.data, bc.textBuffer->getIndexBuffer(), indexSize);
 			bx::memCopy(tvb.data, bc.textBuffer->getVertexBuffer(), vertexSize);
 			bgfx::setVertexBuffer(0, &tvb, 0, bc.textBuffer->getVertexCount() );
@@ -814,84 +816,84 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 
 void TextBufferManager::setStyle(TextBufferHandle _handle, uint32_t _flags)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->setStyle(_flags);
 }
 
 void TextBufferManager::setTextColor(TextBufferHandle _handle, uint32_t _rgba)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->setTextColor(_rgba);
 }
 
 void TextBufferManager::setBackgroundColor(TextBufferHandle _handle, uint32_t _rgba)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->setBackgroundColor(_rgba);
 }
 
 void TextBufferManager::setOverlineColor(TextBufferHandle _handle, uint32_t _rgba)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->setOverlineColor(_rgba);
 }
 
 void TextBufferManager::setUnderlineColor(TextBufferHandle _handle, uint32_t _rgba)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->setUnderlineColor(_rgba);
 }
 
 void TextBufferManager::setStrikeThroughColor(TextBufferHandle _handle, uint32_t _rgba)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->setStrikeThroughColor(_rgba);
 }
 
 void TextBufferManager::setPenPosition(TextBufferHandle _handle, float _x, float _y)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->setPenPosition(_x, _y);
 }
 
 void TextBufferManager::appendText(TextBufferHandle _handle, FontHandle _fontHandle, const char* _string, const char* _end)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->appendText(_fontHandle, _string, _end);
 }
 
 void TextBufferManager::appendText(TextBufferHandle _handle, FontHandle _fontHandle, const wchar_t* _string, const wchar_t* _end)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->appendText(_fontHandle, _string, _end);
 }
 
 void TextBufferManager::appendAtlasFace(TextBufferHandle _handle, uint16_t _faceIndex)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->appendAtlasFace(_faceIndex);
 }
 
 void TextBufferManager::clearTextBuffer(TextBufferHandle _handle)
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	bc.textBuffer->clearTextBuffer();
 }
 
 TextRectangle TextBufferManager::getRectangle(TextBufferHandle _handle) const
 {
-	BX_CHECK(bgfx::isValid(_handle), "Invalid handle used");
+	BX_ASSERT(bgfx::isValid(_handle), "Invalid handle used");
 	BufferCache& bc = m_textBuffers[_handle.idx];
 	return bc.textBuffer->getRectangle();
 }
