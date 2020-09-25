@@ -4586,7 +4586,7 @@ namespace bgfx { namespace d3d12
 			}
 		}
 
-		uint16_t shaderSize;
+		uint32_t shaderSize;
 		bx::read(&reader, shaderSize);
 
 		const void* code = reader.getDataPtr();

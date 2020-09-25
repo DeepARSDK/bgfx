@@ -128,7 +128,7 @@ namespace bgfx
 				}
 			}
 
-			uint16_t shaderSize;
+			uint32_t shaderSize;
 			bx::read(_reader, shaderSize, _err);
 
 			if (!_err->isOk() ) { return; }

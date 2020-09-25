@@ -4436,7 +4436,7 @@ namespace bgfx
 		return s_ctx->createTexture(mem, _flags, 0, NULL, _ratio, _nativeHandle);
 	}
 
-    TextureHandle createTexture2DN(uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint32_t _flags, const Memory* _mem, uint32_t _nativeHandle)
+    TextureHandle createTexture2DN(uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint64_t _flags, const Memory* _mem, uint32_t _nativeHandle)
     {
         BX_ASSERT(_width > 0 && _height > 0, "Invalid texture size (width %d, height %d).", _width, _height);
         return createTexture2D(BackbufferRatio::Count, _width, _height, _hasMips, _numLayers, _format, _flags, _mem, _nativeHandle);
@@ -4448,7 +4448,7 @@ namespace bgfx
 		return createTexture2D(BackbufferRatio::Count, _width, _height, _hasMips, _numLayers, _format, _flags, _mem);
 	}
 
-	TextureHandle createTexture2D(BackbufferRatio::Enum _ratio, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint64_t _flags)
+	TextureHandle createTexture2D(BackbufferRatio::Enum _ratio, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint64_t _flags, uint32_t _native_handle)
 	{
 		BX_ASSERT(_ratio < BackbufferRatio::Count, "Invalid back buffer ratio.");
 		return createTexture2D(_ratio, 0, 0, _hasMips, _numLayers, _format, _flags, NULL);

@@ -2713,7 +2713,7 @@ namespace bgfx
         , bool     _hasMips
         , uint16_t _numLayers
         , TextureFormat::Enum _format
-        , uint32_t _flags
+        , uint64_t _flags
         , const Memory* _mem
         , uint32_t _nativeHandle
         );
@@ -2741,7 +2741,7 @@ namespace bgfx
 		, bool _hasMips
 		, uint16_t _numLayers
 		, TextureFormat::Enum _format
-		, uint32_t _flags = BGFX_TEXTURE_NONE | BGFX_SAMPLER_NONE
+		, uint64_t _flags = BGFX_TEXTURE_NONE | BGFX_SAMPLER_NONE
 		, uint32_t _nativeHandle = 0
 		);
 

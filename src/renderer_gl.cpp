@@ -3301,7 +3301,7 @@ static uint8_t skipTextureFormatCheck[] = {
 			m_program[_handle.idx].destroy();
 		}
 
-		void* createTexture(TextureHandle _handle, const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle) override
+		void* createTexture(TextureHandle _handle, const Memory* _mem, uint64_t _flags, uint8_t _skip, uint32_t nativeHandle) override
 		{
 			m_textures[_handle.idx].create(_mem, _flags, _skip, nativeHandle);
 			return NULL;
@@ -5416,7 +5416,7 @@ static uint8_t skipTextureFormatCheck[] = {
 		return true;
 	}
 
-	void TextureGL::createFromNative(uint32_t _nativeHandle, uint32_t _flags)
+	void TextureGL::createFromNative(uint32_t _nativeHandle, uint64_t _flags)
 	{
 
 		m_id = _nativeHandle;
@@ -5438,7 +5438,7 @@ static uint8_t skipTextureFormatCheck[] = {
 		glBindTexture(m_target, 0);
 	}
 
-	void TextureGL::create(const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle)
+	void TextureGL::create(const Memory* _mem, uint64_t _flags, uint8_t _skip, uint32_t nativeHandle)
 	{
 		if (nativeHandle) {
 			m_id = nativeHandle;

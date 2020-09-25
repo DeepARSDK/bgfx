@@ -156,7 +156,7 @@ namespace bgfx { namespace noop
 		{
 		}
 
-		void* createTexture(TextureHandle /*_handle*/, const Memory* /*_mem*/, uint32_t /*_flags*/, uint8_t /*_skip*/, uint32_t /* _nativeHandle */) override
+		void* createTexture(TextureHandle /*_handle*/, const Memory* /*_mem*/, uint64_t /*_flags*/, uint8_t /*_skip*/, uint32_t /* _nativeHandle */) override
 		{
 			return NULL;
 		}
