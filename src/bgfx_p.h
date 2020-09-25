@@ -4199,7 +4199,7 @@ namespace bgfx
 			}
 		}
 
-		BGFX_API_FUNC(TextureHandle createTexture(const Memory* _mem, uint64_t _flags, uint8_t _skip, TextureInfo* _info, BackbufferRatio::Enum _ratio, bool _immutable, uint32_t _nativeHandle = 0) )
+		BGFX_API_FUNC(TextureHandle createTexture(const Memory* _mem, uint64_t _flags, uint8_t _skip, TextureInfo* _info, BackbufferRatio::Enum _ratio, bool _immutable, uint32_t _nativeHandle) )
 		{
 			BGFX_MUTEX_SCOPE(m_resourceApiLock);
 

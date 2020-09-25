@@ -4362,7 +4362,7 @@ namespace bgfx
 	TextureHandle createTexture(const Memory* _mem, uint64_t _flags, uint8_t _skip, TextureInfo* _info)
 	{
 		BX_ASSERT(NULL != _mem, "_mem can't be NULL");
-		return s_ctx->createTexture(_mem, _flags, _skip, _info, BackbufferRatio::Count, false);
+		return s_ctx->createTexture(_mem, _flags, _skip, _info, BackbufferRatio::Count, false, 0);
 	}
 
 	void getTextureSizeFromRatio(BackbufferRatio::Enum _ratio, uint16_t& _width, uint16_t& _height)
@@ -4383,7 +4383,7 @@ namespace bgfx
 		_height = bx::max<uint16_t>(1, _height);
 	}
 
-	static TextureHandle createTexture2D(BackbufferRatio::Enum _ratio, uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint32_t _flags, const Memory* _mem, uint32_t _nativeHandle = 0)
+	static TextureHandle createTexture2D(BackbufferRatio::Enum _ratio, uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint64_t _flags, const Memory* _mem, uint32_t _nativeHandle = 0)
 	{
 		bx::Error err;
 		isTextureValid(0, false, _numLayers, _format, _flags, &err);
@@ -4433,7 +4433,7 @@ namespace bgfx
 		tc.m_mem       = _mem;
 		bx::write(&writer, tc);
 
-		return s_ctx->createTexture(mem, _flags, 0, NULL, _ratio, _nativeHandle);
+		return s_ctx->createTexture(mem, _flags, 0, NULL, _ratio, NULL != _mem, _nativeHandle);
 	}
 
     TextureHandle createTexture2DN(uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint64_t _flags, const Memory* _mem, uint32_t _nativeHandle)
@@ -4492,7 +4492,7 @@ namespace bgfx
 		tc.m_mem       = _mem;
 		bx::write(&writer, tc);
 
-		return s_ctx->createTexture(mem, _flags, 0, NULL, BackbufferRatio::Count, NULL != _mem);
+		return s_ctx->createTexture(mem, _flags, 0, NULL, BackbufferRatio::Count, NULL != _mem, 0);
 	}
 
 	TextureHandle createTextureCube(uint16_t _size, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint64_t _flags, const Memory* _mem)
@@ -4534,7 +4534,7 @@ namespace bgfx
 		tc.m_mem       = _mem;
 		bx::write(&writer, tc);
 
-		return s_ctx->createTexture(mem, _flags, 0, NULL, BackbufferRatio::Count, NULL != _mem);
+		return s_ctx->createTexture(mem, _flags, 0, NULL, BackbufferRatio::Count, NULL != _mem, 0);
 	}
 
 	void setName(TextureHandle _handle, const char* _name, int32_t _len)
