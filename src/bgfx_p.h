@@ -3844,9 +3844,10 @@ namespace bgfx
 			||   (isShaderType(magic, 'F') && isShaderVerLess(magic, 5) )
 			||   (isShaderType(magic, 'V') && isShaderVerLess(magic, 5) ) )
 			{
-				BX_TRACE("Unsupported shader binary version.");
-				release(_mem);
-				return BGFX_INVALID_HANDLE;
+				BX_TRACE("Using older shader version.");
+                //BX_TRACE("Unsupported shader binary version.");
+				//release(_mem);
+				//return BGFX_INVALID_HANDLE;
 			}
 
 			const uint32_t shaderHash = bx::hash<bx::HashMurmur2A>(_mem->data, _mem->size);
@@ -4125,11 +4126,11 @@ namespace bgfx
 		{
 			BGFX_MUTEX_SCOPE(m_resourceApiLock);
 
-			if (!isValid(_vsh) )
-			{
-				BX_WARN(false, "Compute shader is invalid (vsh %d).", _vsh.idx);
-				return BGFX_INVALID_HANDLE;
-			}
+//			if (!isValid(_vsh) )
+//			{
+//				BX_WARN(false, "Compute shader is invalid (vsh %d).", _vsh.idx);
+//				return BGFX_INVALID_HANDLE;
+//			}
 
 			ProgramHandle handle = { m_programHashMap.find(_vsh.idx) };
 
