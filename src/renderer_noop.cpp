@@ -169,6 +169,10 @@ namespace bgfx { namespace noop
 		{
 		}
 
+        void setFrameBufferPresentationTime(FrameBufferHandle /*handle*/, int64_t /*timestamp*/) override
+        {
+        }
+
 		void createFrameBuffer(FrameBufferHandle /*_handle*/, void* /*_nwh*/, uint32_t /*_width*/, uint32_t /*_height*/, TextureFormat::Enum /*_depthFormat*/) override
 		{
 		}

@@ -2857,6 +2857,17 @@ namespace bgfx
 		, TextureFormat::Enum _depthFormat = TextureFormat::UnknownDepth
 		);
 
+    /// Set presentation time of the framebuffer. (Used in Android
+    /// for recording Audio&Video sync)
+    ///
+    /// @param[in] _handle Frame buffer handle
+    /// @param[in] _timestamp presentation time
+    ///
+	void setFrameBufferPresentationTime(
+          FrameBufferHandle _handle
+        , int64_t _timestamp
+	        );
+
 	/// Obtain texture handle of frame buffer attachment.
 	///
 	/// @param[in] _handle Frame buffer handle.

@@ -101,16 +101,20 @@ EGL_IMPORT
 
 	static EGLint s_contextAttrs[16];
 
+    typedef khronos_stime_nanoseconds_t EGLnsecsANDROID;
 
-	bool (*eglPresentationTimeANDROID_)(EGLDisplay dpy, EGLSurface sur,
-										khronos_stime_nanoseconds_t time);
+    EGLBoolean (*eglPresentationTimeANDROID)(EGLDisplay dpy, EGLSurface surface,
+                                             EGLnsecsANDROID time);
 
 
-	struct SwapChainGL
-	{
-		SwapChainGL(EGLDisplay _display, EGLConfig _config, EGLContext _context, EGLNativeWindowType _nwh)
+
+        SwapChainGL::SwapChainGL(EGLDisplay _display, EGLConfig _config, EGLContext _context, EGLNativeWindowType _nwh)
 			: m_nwh(_nwh)
 			, m_display(_display)
+#ifdef BX_PLATFORM_ANDROID
+            , m_needsPresentationTimeANDROID(false)
+            , m_enabled(false)
+#endif
 		{
 			m_surface = eglCreateWindowSurface(m_display, _config, _nwh, NULL);
 			BGFX_FATAL(m_surface != EGL_NO_SURFACE, Fatal::UnableToInitialize, "Failed to create surface.");
@@ -130,28 +134,38 @@ EGL_IMPORT
 */
 		}
 
-		~SwapChainGL()
+        SwapChainGL::~SwapChainGL()
 		{
 			eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 			eglDestroyContext(m_display, m_context);
 			eglDestroySurface(m_display, m_surface);
 		}
 
-		void makeCurrent()
+		void SwapChainGL::makeCurrent()
 		{
 			eglMakeCurrent(m_display, m_surface, m_surface, m_context);
 		}
 
-		void swapBuffers()
+		void SwapChainGL::swapBuffers()
 		{
+#ifdef  BX_PLATFORM_ANDROID
+		    if(m_needsPresentationTimeANDROID) {
+		        m_enabled = true;
+		    }
+            if(m_enabled && m_needsPresentationTimeANDROID)
+            {
+                eglPresentationTimeANDROID(m_display, m_surface, m_presentationTimeANDROID);
+                m_needsPresentationTimeANDROID = false;
+            }
+            if(!m_enabled) {
+                return;
+            }
+#endif
 			eglSwapBuffers(m_display, m_surface);
 		}
 
-		EGLNativeWindowType m_nwh;
-		EGLContext m_context;
-		EGLDisplay m_display;
-		EGLSurface m_surface;
-	};
+
+
 
 #	if BX_PLATFORM_RPI
 	static EGL_DISPMANX_WINDOW_T s_dispmanWindow;
@@ -206,6 +220,8 @@ EGL_IMPORT
 
 			// https://www.khronos.org/registry/EGL/extensions/ANDROID/EGL_ANDROID_recordable.txt
 			const bool hasEglAndroidRecordable = !!bx::findIdentifierMatch(extensions, "EGL_ANDROID_recordable");
+			// https://www.khronos.org/registry/EGL/extensions/ANDROID/EGL_ANDROID_presentation_time.txt
+			const bool hasEglAndroidPresentationTime = !!bx::findIdentifierMatch(extensions, "EGL_ANDROID_presentation_time");
 
 			bool msaaEnabled = false;
 			int32_t msaaSamples = 0;
@@ -222,11 +238,12 @@ EGL_IMPORT
 			if (msaaSamples != 0) {
 				msaaEnabled = true;
 			}
-#if !(BX_PLATFORM_EMSCRIPTEN)
-            eglPresentationTimeANDROID_ = reinterpret_cast<
-                    bool (*)(EGLDisplay, EGLSurface, khronos_stime_nanoseconds_t)>(
-                    eglGetProcAddress("eglPresentationTimeANDROID"));
-#endif
+
+			if (hasEglAndroidPresentationTime)
+            {
+                eglPresentationTimeANDROID = reinterpret_cast<EGLBoolean (*)(EGLDisplay, EGLSurface, EGLnsecsANDROID)>(eglGetProcAddress("eglPresentationTimeANDROID"));
+            }
+
 			EGLint attrs[] =
 			{
 				EGL_RED_SIZE, 8,
@@ -443,17 +460,7 @@ EGL_IMPORT
 		{
 			if (NULL != m_display)
 			{
-				 // this for video processing
-#if VIDEO_PROCESSING_ENABLED
-				int64_t* pTime = (int64_t*)bgfx::framePresentationTimes->pop();
-				if (pTime && *pTime >= 0) {
-					eglPresentationTimeANDROID_(m_display, m_surface, (*pTime)*1000);
-					eglSwapBuffers(m_display, m_surface);
-					delete pTime;
-				}
-#else
 				eglSwapBuffers(m_display, m_surface);
-#endif
 			}
 		}
 		else

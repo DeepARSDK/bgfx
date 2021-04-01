@@ -1248,6 +1248,9 @@ namespace bgfx { namespace gl
 		uint16_t destroy();
 		void resolve();
 		void discard(uint16_t _flags);
+#ifdef BX_PLATFORM_ANDROID
+		void setPresentationTimeANDROID(int64_t timestamp);
+#endif
 
 		SwapChainGL* m_swapChain;
 		GLuint m_fbo[2];

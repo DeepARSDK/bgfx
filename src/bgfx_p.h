@@ -692,6 +692,7 @@ namespace bgfx
 			UpdateViewName,
 			InvalidateOcclusionQuery,
 			SetName,
+			SetFrameBufferPresentationTime,
 			End,
 			RendererShutdownEnd,
 			DestroyVertexDecl,
@@ -2559,6 +2560,7 @@ namespace bgfx
 		virtual void destroyTexture(TextureHandle _handle) = 0;
 		virtual void createFrameBuffer(FrameBufferHandle _handle, uint8_t _num, const Attachment* _attachment) = 0;
 		virtual void createFrameBuffer(FrameBufferHandle _handle, void* _nwh, uint32_t _width, uint32_t _height, TextureFormat::Enum _depthFormat) = 0;
+		virtual void setFrameBufferPresentationTime(FrameBufferHandle _handle, int64_t _timestamp) = 0;
 		virtual void destroyFrameBuffer(FrameBufferHandle _handle) = 0;
 		virtual void createUniform(UniformHandle _handle, UniformType::Enum _type, uint16_t _num, const char* _name) = 0;
 		virtual void destroyUniform(UniformHandle _handle) = 0;
@@ -4038,6 +4040,20 @@ namespace bgfx
 
 			return handle;
 		}
+
+        BGFX_API_FUNC(void setFrameBufferPresentationTime(FrameBufferHandle _handle, int64_t _timestamp) )
+        {
+            BGFX_MUTEX_SCOPE(m_resourceApiLock);
+
+            BX_WARN(isValid(_handle), "Failed to allocate frame buffer handle.");
+
+            if (isValid(_handle) )
+            {
+                CommandBuffer& cmdbuf = getCommandBuffer(CommandBuffer::SetFrameBufferPresentationTime);
+                cmdbuf.write(_handle);
+                cmdbuf.write(_timestamp);
+            }
+        }
 
 		BGFX_API_FUNC(TextureHandle getTexture(FrameBufferHandle _handle, uint8_t _attachment) )
 		{

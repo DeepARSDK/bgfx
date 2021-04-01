@@ -17,7 +17,23 @@
 
 namespace bgfx { namespace gl
 {
-	struct SwapChainGL;
+	struct SwapChainGL {
+
+        SwapChainGL(EGLDisplay _display, EGLConfig _config, EGLContext _context, EGLNativeWindowType _nwh);
+        ~SwapChainGL();
+        void makeCurrent();
+        void swapBuffers();
+
+        EGLNativeWindowType m_nwh;
+        EGLContext m_context;
+        EGLDisplay m_display;
+        EGLSurface m_surface;
+#ifdef BX_PLATFORM_ANDROID
+        bool m_needsPresentationTimeANDROID;
+        int64_t m_presentationTimeANDROID;
+        bool m_enabled;
+#endif
+	};
 
 	struct GlContext
 	{

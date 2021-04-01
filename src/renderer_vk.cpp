@@ -2073,6 +2073,10 @@ VK_IMPORT_DEVICE
 		{
 		}
 
+        void setFrameBufferPresentationTime(FrameBufferHandle /*_handle*/, int64_t /*_timestamp*/) override
+        {
+        }
+
 		void destroyFrameBuffer(FrameBufferHandle /*_handle*/) override
 		{
 		}

@@ -2986,6 +2986,13 @@ namespace bgfx { namespace gl
 			m_frameBuffers[_handle.idx].create(denseIdx, _nwh, _width, _height, _depthFormat);
 		}
 
+		void setFrameBufferPresentationTime(FrameBufferHandle _handle, int64_t _timestamp) override
+        {
+#ifdef  BX_PLATFORM_ANDROID
+            m_frameBuffers[_handle.idx].setPresentationTimeANDROID(_timestamp);
+#endif
+        }
+
 		void destroyFrameBuffer(FrameBufferHandle _handle) override
 		{
 			uint16_t denseIdx = m_frameBuffers[_handle.idx].destroy();
@@ -6556,6 +6563,14 @@ namespace bgfx { namespace gl
 
 		GL_CHECK(glInvalidateFramebuffer(GL_FRAMEBUFFER, idx, buffers) );
 	}
+
+#ifdef BX_PLATFORM_ANDROID
+    void FrameBufferGL::setPresentationTimeANDROID(int64_t timestamp)
+    {
+	    m_swapChain->m_needsPresentationTimeANDROID = true;
+        m_swapChain->m_presentationTimeANDROID = timestamp;
+    }
+#endif
 
 	void OcclusionQueryGL::create()
 	{

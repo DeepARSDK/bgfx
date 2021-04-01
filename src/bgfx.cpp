@@ -2619,6 +2619,17 @@ namespace bgfx
 				}
 				break;
 
+			case CommandBuffer::SetFrameBufferPresentationTime:
+            {
+                FrameBufferHandle handle;
+                _cmdbuf.read(handle);
+
+                int64_t timestamp;
+                _cmdbuf.read(timestamp);
+                m_renderCtx->setFrameBufferPresentationTime(handle, timestamp);
+            }
+            break;
+
 			case CommandBuffer::DestroyFrameBuffer:
 				{
 					FrameBufferHandle handle;
@@ -3945,6 +3956,13 @@ error:
 			, _depthFormat
 			);
 	}
+
+	void setFrameBufferPresentationTime(FrameBufferHandle _handle, int64_t _timestamp)
+    {
+#ifdef BX_PLATFORM_ANDROID
+	    s_ctx->setFrameBufferPresentationTime(_handle, _timestamp);
+#endif
+    }
 
 	TextureHandle getTexture(FrameBufferHandle _handle, uint8_t _attachment)
 	{
