@@ -148,7 +148,7 @@ EGL_IMPORT
 
 		void SwapChainGL::swapBuffers()
 		{
-#ifdef  BX_PLATFORM_ANDROID
+#if  BX_PLATFORM_ANDROID
 		    if(m_needsPresentationTimeANDROID) {
 		        m_enabled = true;
 		    }
