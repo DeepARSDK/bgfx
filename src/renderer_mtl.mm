@@ -877,6 +877,10 @@ namespace bgfx { namespace mtl
 			m_windows[denseIdx] = _handle;
 			m_frameBuffers[_handle.idx].create(denseIdx, _nwh, _width, _height, _depthFormat);
 		}
+        
+        void setFrameBufferPresentationTime(FrameBufferHandle /*handle*/, int64_t /*timestamp*/) override
+        {
+        }
 
 		void destroyFrameBuffer(FrameBufferHandle _handle) override
 		{

@@ -28,7 +28,7 @@ namespace bgfx { namespace gl
         EGLContext m_context;
         EGLDisplay m_display;
         EGLSurface m_surface;
-#ifdef BX_PLATFORM_ANDROID
+#if BX_PLATFORM_ANDROID
         bool m_needsPresentationTimeANDROID;
         int64_t m_presentationTimeANDROID;
         bool m_enabled;

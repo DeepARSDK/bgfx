@@ -2988,7 +2988,7 @@ namespace bgfx { namespace gl
 
 		void setFrameBufferPresentationTime(FrameBufferHandle _handle, int64_t _timestamp) override
         {
-#ifdef  BX_PLATFORM_ANDROID
+#if  BX_PLATFORM_ANDROID
             m_frameBuffers[_handle.idx].setPresentationTimeANDROID(_timestamp);
 #endif
         }
@@ -6564,7 +6564,7 @@ namespace bgfx { namespace gl
 		GL_CHECK(glInvalidateFramebuffer(GL_FRAMEBUFFER, idx, buffers) );
 	}
 
-#ifdef BX_PLATFORM_ANDROID
+#if BX_PLATFORM_ANDROID
     void FrameBufferGL::setPresentationTimeANDROID(int64_t timestamp)
     {
 	    m_swapChain->m_needsPresentationTimeANDROID = true;

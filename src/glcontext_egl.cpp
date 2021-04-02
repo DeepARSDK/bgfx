@@ -111,7 +111,7 @@ EGL_IMPORT
         SwapChainGL::SwapChainGL(EGLDisplay _display, EGLConfig _config, EGLContext _context, EGLNativeWindowType _nwh)
 			: m_nwh(_nwh)
 			, m_display(_display)
-#ifdef BX_PLATFORM_ANDROID
+#if BX_PLATFORM_ANDROID
             , m_needsPresentationTimeANDROID(false)
             , m_enabled(false)
 #endif

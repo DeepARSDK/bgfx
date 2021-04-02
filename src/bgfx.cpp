@@ -3959,7 +3959,7 @@ error:
 
 	void setFrameBufferPresentationTime(FrameBufferHandle _handle, int64_t _timestamp)
     {
-#ifdef BX_PLATFORM_ANDROID
+#if BX_PLATFORM_ANDROID
 	    s_ctx->setFrameBufferPresentationTime(_handle, _timestamp);
 #endif
     }
