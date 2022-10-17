@@ -434,7 +434,10 @@ vec4  mod(vec4  _a, vec4  _b) { return _a - _b * floor(_a / _b); }
 #	define atan2(_x, _y) atan(_x, _y)
 #	define mul(_a, _b) ( (_a) * (_b) )
 #	define saturate(_x) clamp(_x, 0.0, 1.0)
-#	define SAMPLER2D(_name, _reg)       uniform sampler2D _name
+#	define SAMPLER2D(_name, _reg)    \
+		uniform vec4 _dts_ ## _name; \
+		uniform sampler2D _name
+#	define TEXTURE2D_SIZE(_name) _dts_ ## _name
 #	define SAMPLER2DMS(_name, _reg)     uniform sampler2DMS _name
 #	define SAMPLER3D(_name, _reg)       uniform sampler3D _name
 #	define SAMPLERCUBE(_name, _reg)     uniform samplerCube _name
