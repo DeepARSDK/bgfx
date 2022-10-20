@@ -179,7 +179,8 @@ EGL_IMPORT
 
 		m_eglLibrary = eglOpen();
 
-		if (NULL == g_platformData.context)
+		void* sharedCtx = g_platformData.context;
+		if (true)
 		{
 #	if BX_PLATFORM_RPI
 			g_platformData.ndt = EGL_DEFAULT_DISPLAY;
@@ -356,7 +357,7 @@ EGL_IMPORT
 
 				bx::write(&writer, EGLint(EGL_NONE) );
 
-				m_context = eglCreateContext(m_display, m_config, EGL_NO_CONTEXT, s_contextAttrs);
+				m_context = eglCreateContext(m_display, m_config, sharedCtx, s_contextAttrs);
 				if (NULL != m_context)
 				{
 					break;
@@ -471,6 +472,14 @@ EGL_IMPORT
 
 	void GlContext::makeCurrent(SwapChainGL* _swapChain)
 	{
+#if BX_PLATFORM_ANDROID
+        if (NULL == _swapChain)
+        {
+            m_current = NULL;
+            eglMakeCurrent(m_display, m_surface, m_surface, m_context);
+            return;
+        }
+#endif
 		if (m_current != _swapChain)
 		{
 			m_current = _swapChain;
