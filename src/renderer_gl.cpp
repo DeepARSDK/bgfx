@@ -1196,14 +1196,20 @@ namespace bgfx { namespace gl
 
 	void GL_APIENTRY debugProcCb(GLenum _source, GLenum _type, GLuint _id, GLenum _severity, GLsizei /*_length*/, const GLchar* _message, const void* /*_userParam*/)
 	{
+        if(_id == 2147483647) {
+            // This is a bug in Qualcomms GL drivers. Ignore.
+            return;
+        }
+
 		if (GL_DEBUG_SEVERITY_NOTIFICATION != _severity)
 		{
-			BX_TRACE("src %s, type %s, id %d, severity %s, '%s'"
+			BX_TRACE("src %s, type %s, id %d, severity %s, '%s' vendor: %s"
 					, toString(_source)
 					, toString(_type)
 					, _id
 					, toString(_severity)
 					, _message
+                    , glGetString(GL_VENDOR)
 					);
 			BX_UNUSED(_source, _type, _id, _severity, _message);
 		}
