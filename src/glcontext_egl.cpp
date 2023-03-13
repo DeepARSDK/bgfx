@@ -352,7 +352,11 @@ EGL_IMPORT
 #	endif // BX_PLATFORM_RPI
 				{
 					bx::write(&writer, EGLint(EGL_CONTEXT_CLIENT_VERSION) );
-					bx::write(&writer, 2);
+#if BX_PLATFORM_EMSCRIPTEN
+					bx::write(&writer, 3);
+#else
+                    bx::write(&writer, 2);
+#endif
 				}
 
 				bx::write(&writer, EGLint(EGL_NONE) );

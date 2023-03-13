@@ -267,13 +267,13 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//RG11B10F,
 			SKIP_ALL,//UnknownDepth, // Depth formats below.
 			SKIP_MIP_AUTOGEN,//D16,
-			SKIP_ALL,//D24,
-			SKIP_ALL,//D24S8,
-			SKIP_ALL,//D32, 70
-			SKIP_ALL,//D16F,
-			SKIP_ALL,//D24F,
-			SKIP_ALL,//D32F,
-			SKIP_ALL,//D0S8,
+            SKIP_MIP_AUTOGEN,//D24,
+            SKIP_MIP_AUTOGEN,//D24S8,
+            SKIP_MIP_AUTOGEN,//D32, 70
+            SKIP_MIP_AUTOGEN,//D16F,
+            SKIP_MIP_AUTOGEN,//D24F,
+            SKIP_MIP_AUTOGEN,//D32F,
+            SKIP_MIP_AUTOGEN,//D0S8,
 			SKIP_ALL//Count
 	};
 
@@ -2122,7 +2122,9 @@ namespace bgfx { namespace gl
 
 				if (BX_ENABLED(BGFX_CONFIG_RENDERER_OPENGLES) )
 				{
+#if !BX_PLATFORM_EMSCRIPTEN
 					setTextureFormat(TextureFormat::D32, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+#endif
 
 					if (BX_ENABLED(BGFX_CONFIG_RENDERER_OPENGLES < 30) )
 					{
@@ -2152,7 +2154,7 @@ namespace bgfx { namespace gl
 							s_textureFilter[TextureFormat::RGBA32F] = linear32F;
 						}
 
-						if (BX_ENABLED(BX_PLATFORM_IOS) || BX_ENABLED(BX_PLATFORM_EMSCRIPTEN))
+						if (BX_ENABLED(BX_PLATFORM_IOS)/* || BX_ENABLED(BX_PLATFORM_EMSCRIPTEN)*/)
 						{
 							setTextureFormat(TextureFormat::D16,   GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT);
 							setTextureFormat(TextureFormat::D24S8, GL_DEPTH_STENCIL,   GL_DEPTH_STENCIL,   GL_UNSIGNED_INT_24_8);
@@ -4986,8 +4988,10 @@ namespace bgfx { namespace gl
 			m_fmt  = tfi.m_fmt;
 			m_type = tfi.m_type;
 			createFromNative(m_id, _flags);
+            GL_CHECK(glBindTexture(_target, m_id) );
 			setSamplerState(_flags, NULL);
-			return true;
+            GL_CHECK(glBindTexture(_target, 0) );
+			return false;
 		}
 
 		const bool writeOnly    = 0 != (m_flags&BGFX_TEXTURE_RT_WRITE_ONLY);
