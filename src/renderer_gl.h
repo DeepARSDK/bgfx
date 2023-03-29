@@ -1178,6 +1178,7 @@ namespace bgfx { namespace gl
 			, m_flags(0)
 			, m_currentSamplerHash(UINT32_MAX)
 			, m_numMips(0)
+            , m_fence(nullptr)
 		{
 		}
 
@@ -1186,6 +1187,7 @@ namespace bgfx { namespace gl
 		void createFromNative(uint32_t _nativeHandle, uint32_t _flags);
 		void destroy();
 		void overrideInternal(uintptr_t _ptr);
+        void setFence(GLsync fence);
 		void update(uint8_t _side, uint8_t _mip, const Rect& _rect, uint16_t _z, uint16_t _depth, uint16_t _pitch, const Memory* _mem);
 		void setSamplerState(uint32_t _flags, const float _rgba[4]);
 		void commit(uint32_t _stage, uint32_t _flags, const float _palette[][4]);
@@ -1212,6 +1214,7 @@ namespace bgfx { namespace gl
 		uint8_t m_numMips;
 		uint8_t m_requestedFormat;
 		uint8_t m_textureFormat;
+        GLsync m_fence;
 	};
 
 	struct ShaderGL

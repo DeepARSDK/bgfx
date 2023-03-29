@@ -2627,6 +2627,15 @@ namespace bgfx
 		, uint16_t _pitch = UINT16_MAX
 		);
 
+    /// Set GLsync fence object for texture. It will be awaited before the texture commit.
+    ///
+    /// @param[in] _handle Texture handle.
+    /// @param[in] _fence GLsync fence object.
+    void setTextureFence(
+            TextureHandle _handle
+            , void* _fence
+            );
+
 	/// Update 3D texture.
 	///
 	/// @param[in] _handle Texture handle.

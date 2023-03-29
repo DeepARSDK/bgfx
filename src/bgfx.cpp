@@ -2540,6 +2540,17 @@ namespace bgfx
 				}
 				break;
 
+            case CommandBuffer::SetTextureFence:
+                {
+                    TextureHandle handle;
+                    _cmdbuf.read(handle);
+
+                    void* fence;
+                    _cmdbuf.read(fence);
+                    m_renderCtx->setTextureFence(handle, fence);
+                }
+                break;
+
 			case CommandBuffer::ReadTexture:
 				{
 					TextureHandle handle;
@@ -3861,6 +3872,11 @@ error:
 			s_ctx->updateTexture(_handle, 0, _mip, _x, _y, _layer, _width, _height, 1, _pitch, _mem);
 		}
 	}
+
+    void setTextureFence(TextureHandle _handle, void* _fence)
+    {
+        s_ctx->setTextureFence(_handle, _fence);
+    }
 
 	void updateTexture3D(TextureHandle _handle, uint8_t _mip, uint16_t _x, uint16_t _y, uint16_t _z, uint16_t _width, uint16_t _height, uint16_t _depth, const Memory* _mem)
 	{

@@ -2972,6 +2972,11 @@ namespace bgfx { namespace gl
 			m_textures[_handle.idx].overrideInternal(_ptr);
 		}
 
+        void setTextureFence(TextureHandle _handle, void* _fence) override
+        {
+            m_textures[_handle.idx].setFence((GLsync)_fence);
+        }
+
 		uintptr_t getInternal(TextureHandle _handle) override
 		{
 			return uintptr_t(m_textures[_handle.idx].m_id);
@@ -5430,6 +5435,10 @@ namespace bgfx { namespace gl
         glBindTexture(m_target, 0);
 	}
 
+    void TextureGL::setFence(GLsync fence) {
+        m_fence = fence;
+    }
+
 	void TextureGL::update(uint8_t _side, uint8_t _mip, const Rect& _rect, uint16_t _z, uint16_t _depth, uint16_t _pitch, const Memory* _mem)
 	{
 		const uint32_t bpp = bimg::getBitsPerPixel(bimg::TextureFormat::Enum(m_textureFormat) );
@@ -5643,6 +5652,13 @@ namespace bgfx { namespace gl
 			: m_flags
 			;
 		const uint32_t index = (flags & BGFX_TEXTURE_BORDER_COLOR_MASK) >> BGFX_TEXTURE_BORDER_COLOR_SHIFT;
+
+        if(m_fence) {
+#if BGFX_CONFIG_RENDERER_OPENGLES >= 30
+            GL_CHECK(glWaitSync(m_fence, 0, GL_TIMEOUT_IGNORED));
+#endif
+            m_fence = nullptr;
+        }
 
 		GL_CHECK(glActiveTexture(GL_TEXTURE0+_stage) );
 		GL_CHECK(glBindTexture(m_target, m_id) );

@@ -156,6 +156,10 @@ namespace bgfx { namespace noop
 		{
 		}
 
+        void setTextureFence(TextureHandle /*_handle*/, void* /*_fence*/) override
+        {
+        }
+
 		uintptr_t getInternal(TextureHandle /*_handle*/) override
 		{
 			return 0;

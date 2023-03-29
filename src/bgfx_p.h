@@ -686,6 +686,7 @@ namespace bgfx
 			CreateProgram,
 			CreateTexture,
 			UpdateTexture,
+			SetTextureFence,
 			ResizeTexture,
 			CreateFrameBuffer,
 			CreateUniform,
@@ -2556,6 +2557,7 @@ namespace bgfx
 		virtual void readTexture(TextureHandle _handle, void* _data, uint8_t _mip) = 0;
 		virtual void resizeTexture(TextureHandle _handle, uint16_t _width, uint16_t _height, uint8_t _numMips) = 0;
 		virtual void overrideInternal(TextureHandle _handle, uintptr_t _ptr) = 0;
+		virtual void setTextureFence(TextureHandle _handle, void* _fence) = 0;
 		virtual uintptr_t getInternal(TextureHandle _handle) = 0;
 		virtual void destroyTexture(TextureHandle _handle) = 0;
 		virtual void createFrameBuffer(FrameBufferHandle _handle, uint8_t _num, const Attachment* _attachment) = 0;
@@ -3943,6 +3945,18 @@ namespace bgfx
 			cmdbuf.write(_pitch);
 			cmdbuf.write(_mem);
 		}
+
+        BGFX_API_FUNC(void setTextureFence(
+                TextureHandle _handle
+                , void* _fence
+        ) )
+        {
+            BGFX_MUTEX_SCOPE(m_resourceApiLock);
+
+            CommandBuffer& cmdbuf = getCommandBuffer(CommandBuffer::SetTextureFence);
+            cmdbuf.write(_handle);
+            cmdbuf.write(_fence);
+        }
 
 		bool checkFrameBuffer(uint8_t _num, const Attachment* _attachment) const
 		{
