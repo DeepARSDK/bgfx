@@ -355,7 +355,7 @@ EGL_IMPORT
 #if BX_PLATFORM_EMSCRIPTEN
 					bx::write(&writer, 3);
 #else
-                    bx::write(&writer, 2);
+                    bx::write(&writer, gles);
 #endif
 				}
 
