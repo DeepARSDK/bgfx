@@ -5655,7 +5655,10 @@ namespace bgfx { namespace gl
 
         if(m_fence) {
 #if BGFX_CONFIG_RENDERER_OPENGLES >= 30
-            GL_CHECK(glWaitSync(m_fence, 0, GL_TIMEOUT_IGNORED));
+            if(glIsSync(m_fence)) {
+                GL_CHECK(glWaitSync(m_fence, 0, GL_TIMEOUT_IGNORED));
+                GL_CHECK(glDeleteSync(m_fence));
+            }
 #endif
             m_fence = nullptr;
         }
