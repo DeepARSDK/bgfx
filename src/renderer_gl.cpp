@@ -259,7 +259,7 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//RGBA16S,
 			SKIP_ALL,//RGBA32I,
 			SKIP_ALL,//RGBA32U,
-			SKIP_ALL,//RGBA32F, 60
+            SKIP_MIP_AUTOGEN,//RGBA32F, 60
 			SKIP_ALL,//R5G6B5,
 			SKIP_ALL,//RGBA4,
 			SKIP_ALL,//RGB5A1,
