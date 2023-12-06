@@ -196,6 +196,7 @@ namespace bgfx { namespace gl
 	#define SKIP_FRAMEBUFFER_WRITE 0x02
 	#define SKIP_SRGB 0x04
 	#define SKIP_MIP_AUTOGEN 0x08
+	#define SKIP_GETINTERNALFORMAT 0x10
 
 	static uint8_t skipTextureFormatCheck[] = {
 			SKIP_ALL,//BC1,          //!< DXT1
@@ -217,8 +218,8 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//PTC24,        //!< PVRTC2 RGBA 4BPP
 			SKIP_ALL,//Unknown,      // Compressed formats above.
 			SKIP_ALL,//R1,
-			SKIP_FRAMEBUFFER_WRITE,//A8,
-			SKIP_FRAMEBUFFER_WRITE,//R8, 20
+            SKIP_FRAMEBUFFER_WRITE | SKIP_GETINTERNALFORMAT,//A8,
+			SKIP_NONE,//R8, 20
 			SKIP_ALL,//R8I,
 			SKIP_ALL,//R8U,
 			SKIP_ALL,//R8S,
@@ -248,7 +249,7 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//RGB8S,
 			SKIP_ALL,//RGB9E5F,
 			SKIP_ALL,//BGRA8,
-			SKIP_FRAMEBUFFER_WRITE | SKIP_SRGB,//RGBA8, 50
+			SKIP_NONE,//RGBA8, 50
 			SKIP_ALL,//RGBA8I,
 			SKIP_ALL,//RGBA8U,
 			SKIP_ALL,//RGBA8S,
@@ -259,21 +260,21 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//RGBA16S,
 			SKIP_ALL,//RGBA32I,
 			SKIP_ALL,//RGBA32U,
-            SKIP_MIP_AUTOGEN,//RGBA32F, 60
+            SKIP_NONE,//RGBA32F, 60
 			SKIP_ALL,//R5G6B5,
 			SKIP_ALL,//RGBA4,
 			SKIP_ALL,//RGB5A1,
 			SKIP_ALL,//RGB10A2,
 			SKIP_ALL,//RG11B10F,
 			SKIP_ALL,//UnknownDepth, // Depth formats below.
-			SKIP_MIP_AUTOGEN,//D16,
-            SKIP_MIP_AUTOGEN,//D24,
-            SKIP_MIP_AUTOGEN,//D24S8,
-            SKIP_MIP_AUTOGEN,//D32, 70
-            SKIP_MIP_AUTOGEN,//D16F,
-            SKIP_MIP_AUTOGEN,//D24F,
-            SKIP_MIP_AUTOGEN,//D32F,
-            SKIP_MIP_AUTOGEN,//D0S8,
+			SKIP_MIP_AUTOGEN | SKIP_GETINTERNALFORMAT,//D16,
+            SKIP_MIP_AUTOGEN | SKIP_GETINTERNALFORMAT,//D24,
+            SKIP_ALL,//D24S8,
+            SKIP_ALL,//D32, 70
+            SKIP_MIP_AUTOGEN | SKIP_GETINTERNALFORMAT,//D16F,
+            SKIP_MIP_AUTOGEN | SKIP_GETINTERNALFORMAT,//D24F,
+            SKIP_MIP_AUTOGEN | SKIP_GETINTERNALFORMAT,//D32F,
+            SKIP_ALL,//D0S8,
 			SKIP_ALL//Count
 	};
 
@@ -2209,8 +2210,7 @@ namespace bgfx { namespace gl
 					}
 				}
 
-				if (BX_ENABLED(BX_PLATFORM_EMSCRIPTEN)
-				||  !isTextureFormatValid(TextureFormat::R8) )
+				if (!isTextureFormatValid(TextureFormat::R8) )
 				{
 					// GL core has to use GL_R8 Issue#208, GLES2 has to use GL_LUMINANCE issue#226
 					s_textureFormat[TextureFormat::R8].m_internalFmt = GL_LUMINANCE;
@@ -2298,7 +2298,7 @@ namespace bgfx { namespace gl
 
 					}
 
-					if (NULL != glGetInternalformativ)
+					if (NULL != glGetInternalformativ && (!BX_ENABLED(BX_PLATFORM_EMSCRIPTEN) || (SKIP_GETINTERNALFORMAT & skipTextureFormatCheck[ii]) != SKIP_GETINTERNALFORMAT))
 					{
 						GLint maxSamples;
 						glGetInternalformativ(GL_RENDERBUFFER
@@ -2313,17 +2313,15 @@ namespace bgfx { namespace gl
 							: BGFX_CAPS_FORMAT_TEXTURE_NONE
 							;
 
-						glGetInternalformativ(GL_TEXTURE_2D_MULTISAMPLE
-							, s_textureFormat[ii].m_internalFmt
-							, GL_SAMPLES
-							, 1
-							, &maxSamples
+						// Not supported in webgl
+						if(!BX_ENABLED(BX_PLATFORM_EMSCRIPTEN)) {
+							glGetInternalformativ(GL_TEXTURE_2D_MULTISAMPLE, s_textureFormat[ii].m_internalFmt, GL_SAMPLES, 1, &maxSamples
 							);
-						err = glGetError();
-						supported |= 0 == err && maxSamples > 0
-							? BGFX_CAPS_FORMAT_TEXTURE_MSAA
-							: BGFX_CAPS_FORMAT_TEXTURE_NONE
-							;
+							err = glGetError();
+							supported |= 0 == err && maxSamples > 0
+										 ? BGFX_CAPS_FORMAT_TEXTURE_MSAA
+										 : BGFX_CAPS_FORMAT_TEXTURE_NONE;
+						}
 					}
 
 					g_caps.formats[ii] = supported;
@@ -2469,10 +2467,13 @@ namespace bgfx { namespace gl
 					|| s_extension[Extension::EXT_shadow_samplers].m_supported
 					;
 
-				m_programBinarySupport = !!(BGFX_CONFIG_RENDERER_OPENGLES >= 30)
-					|| s_extension[Extension::ARB_get_program_binary].m_supported
-					|| s_extension[Extension::OES_get_program_binary].m_supported
-					|| s_extension[Extension::IMG_shader_binary     ].m_supported
+				m_programBinarySupport = !BX_ENABLED(BX_PLATFORM_EMSCRIPTEN)
+					&&	(
+							!!(BGFX_CONFIG_RENDERER_OPENGLES >= 30)
+						|| 	s_extension[Extension::ARB_get_program_binary].m_supported
+						|| 	s_extension[Extension::OES_get_program_binary].m_supported
+						|| 	s_extension[Extension::IMG_shader_binary     ].m_supported
+						)
 					;
 
 				m_textureSwizzleSupport = false
