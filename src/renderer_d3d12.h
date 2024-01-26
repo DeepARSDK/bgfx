@@ -384,6 +384,7 @@ namespace bgfx { namespace d3d12
 		void preReset();
 		void postReset();
 		void resolve();
+		void resolveMipmaps();
 		void clear(ID3D12GraphicsCommandList* _commandList, const Clear& _clear, const float _palette[][4], const D3D12_RECT* _rect = NULL, uint32_t _num = 0);
 		D3D12_RESOURCE_STATES setState(ID3D12GraphicsCommandList* _commandList, uint8_t _idx, D3D12_RESOURCE_STATES _state);
 
