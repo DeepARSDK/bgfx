@@ -4807,7 +4807,7 @@ namespace bgfx { namespace gl
 				{
 					if (NULL == m_constantBuffer)
 					{
-						m_constantBuffer = UniformBuffer::create(1024);
+						m_constantBuffer = UniformBuffer::create(1<<20);
 					}
 
 					UniformType::Enum type = convertGlType(gltype);
