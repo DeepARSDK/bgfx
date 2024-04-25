@@ -6115,8 +6115,11 @@ namespace bgfx { namespace gl
 						}
 						else
 						{
-							writeString(&writer, "out vec4 bgfx_FragColor;\n");
-							writeString(&writer, "#define gl_FragColor bgfx_FragColor\n");
+                            if (!bx::findIdentifierMatch(code, "bgfx_FragColor") )
+                            {
+                                writeString(&writer, "out vec4 bgfx_FragColor;\n");
+                                writeString(&writer, "#define gl_FragColor bgfx_FragColor\n");
+                            }
 						}
 					}
 					else
@@ -6225,8 +6228,11 @@ namespace bgfx { namespace gl
 						}
 						else
 						{
-							writeString(&writer, "out vec4 bgfx_FragColor;\n");
-							writeString(&writer, "#define gl_FragColor bgfx_FragColor\n");
+                            if (!bx::findIdentifierMatch(code, "bgfx_FragColor") )
+                            {
+                                writeString(&writer, "out vec4 bgfx_FragColor;\n");
+							    writeString(&writer, "#define gl_FragColor bgfx_FragColor\n");
+                            }
 						}
 					}
 					else
