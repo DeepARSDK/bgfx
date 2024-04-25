@@ -193,6 +193,8 @@ typedef enum bgfx_texture_format
     BGFX_TEXTURE_FORMAT_D32F,
     BGFX_TEXTURE_FORMAT_D0S8,
 
+    BGFX_TEXTURE_FORMAT_RGB16,
+
     BGFX_TEXTURE_FORMAT_COUNT
 
 } bgfx_texture_format_t;

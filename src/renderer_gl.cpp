@@ -243,7 +243,7 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//RG32I,
 			SKIP_ALL,//RG32U,
 			SKIP_ALL,//RG32F,
-			SKIP_ALL,//RGB8,
+			SKIP_NONE,//RGB8,
 			SKIP_ALL,//RGB8I,
 			SKIP_ALL,//RGB8U,
 			SKIP_ALL,//RGB8S,
@@ -253,9 +253,9 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//RGBA8I,
 			SKIP_ALL,//RGBA8U,
 			SKIP_ALL,//RGBA8S,
-			SKIP_ALL,//RGBA16,
+            SKIP_NONE,//RGBA16,
 			SKIP_ALL,//RGBA16I,
-			SKIP_ALL,//RGBA16U,
+            SKIP_NONE,//RGBA16U,
 			SKIP_ALL,//RGBA16F,
 			SKIP_ALL,//RGBA16S,
 			SKIP_ALL,//RGBA32I,
@@ -275,6 +275,7 @@ namespace bgfx { namespace gl
             SKIP_MIP_AUTOGEN | SKIP_GETINTERNALFORMAT,//D24F,
             SKIP_MIP_AUTOGEN | SKIP_GETINTERNALFORMAT,//D32F,
             SKIP_ALL,//D0S8,
+            SKIP_NONE,//RGB16,
 			SKIP_ALL//Count
 	};
 
@@ -336,7 +337,7 @@ namespace bgfx { namespace gl
 		{ GL_RGBA8_SNORM,                              GL_ZERO,                                       GL_RGBA,                                     GL_BYTE,                         false }, // RGBA8S
 		{ GL_RGBA16,                                   GL_ZERO,                                       GL_RGBA,                                     GL_UNSIGNED_SHORT,               false }, // RGBA16
 		{ GL_RGBA16I,                                  GL_ZERO,                                       GL_RGBA,                                     GL_SHORT,                        false }, // RGBA16I
-		{ GL_RGBA16UI,                                 GL_ZERO,                                       GL_RGBA,                                     GL_UNSIGNED_SHORT,               false }, // RGBA16U
+		{ GL_RGBA16UI,                                 GL_ZERO,                                       GL_RGBA_INTEGER,                             GL_UNSIGNED_SHORT,               false }, // RGBA16U
 		{ GL_RGBA16F,                                  GL_ZERO,                                       GL_RGBA,                                     GL_HALF_FLOAT,                   false }, // RGBA16F
 		{ GL_RGBA16_SNORM,                             GL_ZERO,                                       GL_RGBA,                                     GL_SHORT,                        false }, // RGBA16S
 		{ GL_RGBA32I,                                  GL_ZERO,                                       GL_RGBA,                                     GL_INT,                          false }, // RGBA32I
@@ -356,6 +357,7 @@ namespace bgfx { namespace gl
 		{ GL_DEPTH_COMPONENT32F,                       GL_ZERO,                                       GL_DEPTH_COMPONENT,                          GL_FLOAT,                        false }, // D24F
 		{ GL_DEPTH_COMPONENT32F,                       GL_ZERO,                                       GL_DEPTH_COMPONENT,                          GL_FLOAT,                        false }, // D32F
 		{ GL_STENCIL_INDEX8,                           GL_ZERO,                                       GL_STENCIL_INDEX,                            GL_UNSIGNED_BYTE,                false }, // D0S8
+		{ GL_RGB16,                                    GL_ZERO,                                       GL_RGB,                                      GL_UNSIGNED_SHORT,               false }, // RGB16
 	};
 	BX_STATIC_ASSERT(TextureFormat::Count == BX_COUNTOF(s_textureFormat) );
 
@@ -439,6 +441,7 @@ namespace bgfx { namespace gl
 		GL_DEPTH_COMPONENT32F, // D24F
 		GL_DEPTH_COMPONENT32F, // D32F
 		GL_STENCIL_INDEX8,     // D0S8
+		GL_RGB16,              // RGB16
 	};
 	BX_STATIC_ASSERT(TextureFormat::Count == BX_COUNTOF(s_rboFormat) );
 
@@ -520,6 +523,7 @@ namespace bgfx { namespace gl
 		GL_ZERO,           // D24F
 		GL_ZERO,           // D32F
 		GL_ZERO,           // D0S8
+		GL_RGB16,          // RGB16
 	};
 	BX_STATIC_ASSERT(TextureFormat::Count == BX_COUNTOF(s_imageFormat) );
 

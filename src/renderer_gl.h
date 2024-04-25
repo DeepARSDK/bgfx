@@ -330,6 +330,10 @@ typedef uint64_t GLuint64;
 #	define GL_RGBA16 0x805B
 #endif // GL_RGBA16
 
+#ifndef GL_RGB16
+#	define GL_RGB16 0x8054
+#endif // GL_RGB16
+
 #ifndef GL_RGBA16F
 #	define GL_RGBA16F 0x881A
 #endif // GL_RGBA16F
