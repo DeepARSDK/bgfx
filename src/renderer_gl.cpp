@@ -223,7 +223,7 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//R8I,
 			SKIP_ALL,//R8U,
 			SKIP_ALL,//R8S,
-			SKIP_ALL,//R16,
+            SKIP_NONE,//R16,
 			SKIP_ALL,//R16I,
 			SKIP_ALL,//R16U,
 			SKIP_ALL,//R16F,
