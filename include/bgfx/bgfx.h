@@ -2503,6 +2503,7 @@ namespace bgfx
 		, TextureFormat::Enum _format
 		, uint32_t _flags = BGFX_TEXTURE_NONE
 		, const Memory* _mem = NULL
+        , bool _genMipmaps = false
 		);
 
     TextureHandle createTexture2DN(

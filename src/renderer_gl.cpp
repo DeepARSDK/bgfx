@@ -2850,9 +2850,9 @@ namespace bgfx { namespace gl
 			m_program[_handle.idx].destroy();
 		}
 
-		void* createTexture(TextureHandle _handle, Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle) override
+		void* createTexture(TextureHandle _handle, Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle, bool _genMipmaps) override
 		{
-			m_textures[_handle.idx].create(_mem, _flags, _skip, nativeHandle);
+			m_textures[_handle.idx].create(_mem, _flags, _skip, nativeHandle, _genMipmaps);
 			return NULL;
 		}
 
@@ -5162,7 +5162,7 @@ namespace bgfx { namespace gl
 		glBindTexture(m_target, 0);
 	}
 
-	void TextureGL::create(const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle)
+	void TextureGL::create(const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle, bool _genMipmaps)
 	{
 		if (nativeHandle) {
 			m_id = nativeHandle;
@@ -5347,6 +5347,11 @@ namespace bgfx { namespace gl
 								, m_type
 								, data
 								) );
+
+                            if(_genMipmaps && imageTarget == GL_TEXTURE_2D) {
+                                BX_TRACE("Generating mipmaps for uploaded texture.");
+                                GL_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+                            }
 						}
 					}
 					else if (!computeWrite)

@@ -1187,7 +1187,7 @@ namespace bgfx { namespace gl
 		}
 
 		bool init(GLenum _target, uint32_t _width, uint32_t _height, uint32_t _depth, uint8_t _numMips, uint32_t _flags);
-		void create(const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle);
+		void create(const Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t nativeHandle, bool _genMipmaps = false);
 		void createFromNative(uint32_t _nativeHandle, uint32_t _flags);
 		void destroy();
 		void overrideInternal(uintptr_t _ptr);
