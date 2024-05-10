@@ -255,8 +255,8 @@ namespace bgfx { namespace gl
 			SKIP_ALL,//RGBA8S,
             SKIP_NONE,//RGBA16,
 			SKIP_ALL,//RGBA16I,
-            SKIP_NONE,//RGBA16U,
-			SKIP_ALL,//RGBA16F,
+            SKIP_ALL,//RGBA16U,
+            SKIP_NONE,//RGBA16F,
 			SKIP_ALL,//RGBA16S,
 			SKIP_ALL,//RGBA32I,
 			SKIP_ALL,//RGBA32U,
@@ -2330,6 +2330,66 @@ namespace bgfx { namespace gl
 
 					g_caps.formats[ii] = supported;
 				}
+
+                if(BX_ENABLED(BX_PLATFORM_EMSCRIPTEN)) {
+                    if (s_extension[Extension::EXT_color_buffer_float].m_supported)
+                    {
+                        g_caps.formats[TextureFormat::R16F]    |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+                        g_caps.formats[TextureFormat::RG16F]   |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+                        g_caps.formats[TextureFormat::RGBA16F] |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+
+                        g_caps.formats[TextureFormat::R32F]    |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+                        g_caps.formats[TextureFormat::RG32F]   |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+                        g_caps.formats[TextureFormat::RGBA32F] |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+                        // https://www.khronos.org/registry/gles/extensions/OES/OES_texture_float.txt
+                        // When half/float is available via extensions texture will be marked as
+                        // incomplete if it uses anything other than nearest filter.
+                        const bool linear16F = s_extension[Extension::OES_texture_half_float_linear].m_supported;
+                        const bool linear32F = s_extension[Extension::OES_texture_float_linear     ].m_supported;
+
+                        s_textureFilter[TextureFormat::R16F]    = linear16F;
+                        s_textureFilter[TextureFormat::RG16F]   = linear16F;
+                        s_textureFilter[TextureFormat::RGBA16F] = linear16F;
+                        s_textureFilter[TextureFormat::R32F]    = linear32F;
+                        s_textureFilter[TextureFormat::RG32F]   = linear32F;
+                        s_textureFilter[TextureFormat::RGBA32F] = linear32F;
+
+                        if(linear16F) {
+                            g_caps.formats[TextureFormat::R16F]    |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::RG16F]   |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::RGBA16F] |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                        }
+                        if(linear32F) {
+                            g_caps.formats[TextureFormat::R16F]    |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::RG16F]   |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::RGBA16F] |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::R32F]    |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::RG32F]   |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::RGBA32F] |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                        }
+                    }
+                    if (s_extension[Extension::EXT_color_buffer_half_float].m_supported)
+                    {
+                        g_caps.formats[TextureFormat::R16F]    |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+                        g_caps.formats[TextureFormat::RG16F]   |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+                        g_caps.formats[TextureFormat::RGBA16F] |= BGFX_CAPS_FORMAT_TEXTURE_2D | BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER;
+                        // https://www.khronos.org/registry/gles/extensions/OES/OES_texture_float.txt
+                        // When half/float is available via extensions texture will be marked as
+                        // incomplete if it uses anything other than nearest filter.
+                        const bool linear16F = s_extension[Extension::OES_texture_half_float_linear].m_supported;
+
+                        s_textureFilter[TextureFormat::R16F]    = linear16F;
+                        s_textureFilter[TextureFormat::RG16F]   = linear16F;
+                        s_textureFilter[TextureFormat::RGBA16F] = linear16F;
+
+                        if(linear16F) {
+                            g_caps.formats[TextureFormat::R16F]    |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::RG16F]   |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                            g_caps.formats[TextureFormat::RGBA16F] |= BGFX_CAPS_FORMAT_TEXTURE_MIP_AUTOGEN;
+                        }
+                    }
+                }
+
 
 				g_caps.supported |= !!(BGFX_CONFIG_RENDERER_OPENGL || BGFX_CONFIG_RENDERER_OPENGLES >= 30)
 					|| s_extension[Extension::OES_texture_3D].m_supported
