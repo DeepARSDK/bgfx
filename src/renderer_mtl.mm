@@ -329,7 +329,8 @@ namespace bgfx { namespace mtl
 		{ MTLPixelFormatDepth32Float,					MTLPixelFormatInvalid                        }, // D16F
 		{ MTLPixelFormatDepth32Float,					MTLPixelFormatInvalid                        }, // D24F
 		{ MTLPixelFormatDepth32Float,					MTLPixelFormatInvalid                        }, // D32F
-		{ MTLPixelFormatStencil8,						MTLPixelFormatInvalid                        }, // D0S8
+        { MTLPixelFormatStencil8,                       MTLPixelFormatInvalid                        }, // D0S8
+		{ MTLPixelFormatInvalid,						MTLPixelFormatInvalid                        }, // RGB16
 	};
 	BX_STATIC_ASSERT(TextureFormat::Count == BX_COUNTOF(s_textureFormat) );
 
@@ -784,9 +785,9 @@ namespace bgfx { namespace mtl
 			m_program[_handle.idx].destroy();
 		}
 
-		void* createTexture(TextureHandle _handle, Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t) override
+		void* createTexture(TextureHandle _handle, Memory* _mem, uint32_t _flags, uint8_t _skip, uint32_t, bool _genMipmaps) override
 		{
-			m_textures[_handle.idx].create(_mem, _flags, _skip);
+			m_textures[_handle.idx].create(_mem, _flags, _skip, _genMipmaps);
 			return NULL;
 		}
 
@@ -845,7 +846,7 @@ namespace bgfx { namespace mtl
 			bx::write(&writer, tc);
 
 			texture.destroy();
-			texture.create(mem, texture.m_flags, 0);
+			texture.create(mem, texture.m_flags, 0, false);
 
 			release(mem);
 		}
@@ -2454,7 +2455,7 @@ namespace bgfx { namespace mtl
 		BufferMtl::create(_size, _data, _flags, stride, true);
 	}
 
-	void TextureMtl::create(const Memory* _mem, uint32_t _flags, uint8_t _skip)
+	void TextureMtl::create(const Memory* _mem, uint32_t _flags, uint8_t _skip, bool _genMipmaps)
 	{
 		m_sampler = s_renderMtl->getSamplerState(_flags);
 
@@ -2673,6 +2674,8 @@ namespace bgfx { namespace mtl
 						}
 
 						m_ptr.replaceRegion(region, lod, side, data, bytesPerRow, bytesPerImage);
+                        BlitCommandEncoder bce = s_renderMtl->getBlitCommandEncoder();
+                        bce.generateMipmapsForTexture(m_ptr);
 					}
 
 					width  >>= 1;

@@ -88,6 +88,11 @@ namespace bgfx { namespace mtl
 				 destinationSlice:_destinationSlice destinationLevel:_destinationLevel destinationOrigin:_destinationOrigin];
 		}
 
+        void generateMipmapsForTexture(id<MTLTexture> _texture)
+        {
+            [m_obj generateMipmapsForTexture:_texture];
+        }
+
 #if BX_PLATFORM_OSX
 		void synchronizeTexture(id<MTLTexture> _texture, NSUInteger _slice, NSUInteger _level)
 		{
@@ -802,7 +807,7 @@ namespace bgfx { namespace mtl
 		{
 		}
 
-		void create(const Memory* _mem, uint32_t _flags, uint8_t _skip);
+		void create(const Memory* _mem, uint32_t _flags, uint8_t _skip, bool _genMipmaps);
 		void destroy()
 		{
 			MTL_RELEASE(m_ptr);
