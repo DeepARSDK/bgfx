@@ -6793,7 +6793,52 @@ namespace bgfx { namespace gl
 					, bx::uint32_imax(depth, 1)
 					) );
 			}
-		}
+		} else {
+            while (_bs.hasItem(_view) ) {
+                const BlitItem& bi = _bs.advance();
+
+                const TextureGL& src = m_textures[bi.m_src.idx];
+                const TextureGL& dst = m_textures[bi.m_dst.idx];
+
+                GLuint fbo;
+                GL_CHECK(glGenFramebuffers(1, &fbo) );
+
+                GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, fbo) );
+
+                GLenum format = GL_TEXTURE_2D;
+                GLenum face = GL_TEXTURE_2D;
+                if (dst.isCubeMap()) {
+                    face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + bi.m_dstZ;
+                    format = GL_TEXTURE_CUBE_MAP;
+                }
+
+                GL_CHECK(glFramebufferTexture2D(GL_FRAMEBUFFER
+                        , GL_COLOR_ATTACHMENT0
+                        , GL_TEXTURE_2D
+                        , src.m_id
+                        , bi.m_srcMip
+                ) );
+
+                GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+                BX_UNUSED(status);
+
+                GL_CHECK(glActiveTexture(GL_TEXTURE0) );
+                GL_CHECK(glBindTexture(format, dst.m_id) );
+
+                GL_CHECK(glCopyTexSubImage2D(face
+                        , bi.m_dstMip
+                        , bi.m_dstX
+                        , bi.m_dstY
+                        , bi.m_srcX
+                        , bi.m_srcY
+                        , bi.m_width
+                        , bi.m_height
+                ) );
+
+                GL_CHECK(glDeleteFramebuffers(1, &fbo) );
+                GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, m_currentFbo) );
+            }
+        }
 	}
 
 	void RendererContextGL::submit(Frame* _render, ClearQuad& _clearQuad, TextVideoMemBlitter& _textVideoMemBlitter)
