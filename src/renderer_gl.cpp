@@ -1311,6 +1311,7 @@ namespace bgfx { namespace gl
 		, GLenum _format
 		, GLenum _type
 		, const GLvoid* _data
+		, bool isAllocatedStorage
 	)
 	{
 		if (_target == GL_TEXTURE_3D)
@@ -1361,6 +1362,24 @@ namespace bgfx { namespace gl
 		}
 		else
 		{
+#if BX_PLATFORM_EMSCRIPTEN
+			if(isAllocatedStorage) {
+				texSubImage(
+				  _target
+				, _level
+				, 0
+				, 0
+				, _depth
+				, _width
+				, _height
+				, 1
+				, _format
+				, _type
+				, _data
+				);
+				return;
+			}
+#endif
 			glTexImage2D(
 				  _target
 				, _level
@@ -1535,7 +1554,7 @@ namespace bgfx { namespace gl
 			{
 				dim = bx::uint32_max(1, dim);
 				size = (dim*dim*bpp)/8;
-				texImage(target, 0, ii, internalFmt, dim, dim, 0, 0, tfi.m_fmt, tfi.m_type, data);
+				texImage(target, 0, ii, internalFmt, dim, dim, 0, 0, tfi.m_fmt, tfi.m_type, data, false);
 				err |= glGetError();
 			}
 		}
@@ -5353,6 +5372,13 @@ namespace bgfx { namespace gl
 					: target
 					;
 
+				bool isAllocatedStorage = false;
+				#if BX_PLATFORM_EMSCRIPTEN
+					if(_flags&BGFX_TEXTURE_RT_MASK && imageTarget == GL_TEXTURE_2D) {
+						GL_CHECK(glTexStorage2D(imageTarget, numMips, internalFmt, width, height));
+						isAllocatedStorage = true;
+					}
+				#endif
 				for (uint8_t lod = 0, num = numMips; lod < num; ++lod)
 				{
 					width  = bx::uint32_max(1, width);
@@ -5406,7 +5432,7 @@ namespace bgfx { namespace gl
 								, m_fmt
 								, m_type
 								, data
-								) );
+								, isAllocatedStorage) );
 
                             if(_genMipmaps && imageTarget == GL_TEXTURE_2D) {
                                 BX_TRACE("Generating mipmaps for uploaded texture.");
@@ -5447,7 +5473,7 @@ namespace bgfx { namespace gl
 								, m_fmt
 								, m_type
 								, NULL
-								) );
+								, isAllocatedStorage) );
 						}
 					}
 
