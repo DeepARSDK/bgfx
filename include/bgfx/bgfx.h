@@ -2515,6 +2515,7 @@ namespace bgfx
         , uint32_t _flags
         , const Memory* _mem
         , uint32_t _nativeHandle
+        , bool _genMipmaps = false
         );
 
 	/// Create frame buffer with size based on backbuffer ratio. Frame buffer will maintain ratio

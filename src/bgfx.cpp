@@ -2484,7 +2484,7 @@ namespace bgfx
                     bool genMipmaps;
 					_cmdbuf.read(genMipmaps);
 
-					void* ptr = m_renderCtx->createTexture(handle, mem, flags, skip, nativeHandle, true);
+					void* ptr = m_renderCtx->createTexture(handle, mem, flags, skip, nativeHandle, genMipmaps);
 					if (NULL != ptr)
 					{
 						setDirectAccessPtr(handle, ptr);
@@ -3746,10 +3746,10 @@ error:
 	}
 
 
-    TextureHandle createTexture2DN(uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint32_t _flags, const Memory* _mem, uint32_t _nativeHandle)
+    TextureHandle createTexture2DN(uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint32_t _flags, const Memory* _mem, uint32_t _nativeHandle, bool _genMipmaps)
     {
         BX_CHECK(_width > 0 && _height > 0, "Invalid texture size (width %d, height %d).", _width, _height);
-        return createTexture2D(BackbufferRatio::Count, _width, _height, _hasMips, _numLayers, _format, _flags, _mem, _nativeHandle);
+        return createTexture2D(BackbufferRatio::Count, _width, _height, _hasMips, _numLayers, _format, _flags, _mem, _nativeHandle, _genMipmaps);
     }
 
 	TextureHandle createTexture2D(uint16_t _width, uint16_t _height, bool _hasMips, uint16_t _numLayers, TextureFormat::Enum _format, uint32_t _flags, const Memory* _mem, bool _genMipmaps)

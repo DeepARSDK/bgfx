@@ -5062,7 +5062,7 @@ namespace bgfx { namespace gl
 		GL_CHECK(glDeleteBuffers(1, &m_id) );
 	}
 
-	bool TextureGL::init(GLenum _target, uint32_t _width, uint32_t _height, uint32_t _depth, uint8_t _numMips, uint32_t _flags)
+	bool TextureGL::init(GLenum _target, uint32_t _width, uint32_t _height, uint32_t _depth, uint8_t _numMips, uint32_t _flags, bool _genMipmaps)
 	{
 		m_target  = _target;
 		m_numMips = _numMips;
@@ -5079,6 +5079,11 @@ namespace bgfx { namespace gl
 			createFromNative(m_id, _flags);
             GL_CHECK(glBindTexture(_target, m_id) );
 			setSamplerState(_flags, NULL);
+			if(_genMipmaps && m_target == GL_TEXTURE_2D) {
+				BX_TRACE("Generating mipmaps for uploaded texture.");
+				GL_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+				m_numMips = calcNumMips(true, _width, _height, _depth);
+			}
             GL_CHECK(glBindTexture(_target, 0) );
 			return false;
 		}
@@ -5224,7 +5229,7 @@ namespace bgfx { namespace gl
 
 		m_id = _nativeHandle;
 		m_flags = _flags;
-		m_flags |= BGFX_TEXTURE_INTERNAL_SHARED;
+		// m_flags |= BGFX_TEXTURE_INTERNAL_SHARED;
 		const GLenum s_targets[] = {
 			GL_TEXTURE_2D,
 			GL_TEXTURE_RECTANGLE
@@ -5307,6 +5312,7 @@ namespace bgfx { namespace gl
 					, textureDepth
 					, numMips
 					, _flags
+					, _genMipmaps
 					) )
 			{
 				return;
@@ -5437,6 +5443,7 @@ namespace bgfx { namespace gl
                             if(_genMipmaps && imageTarget == GL_TEXTURE_2D) {
                                 BX_TRACE("Generating mipmaps for uploaded texture.");
                                 GL_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+                            	m_numMips = calcNumMips(true, width, height, depth);
                             }
 						}
 					}
